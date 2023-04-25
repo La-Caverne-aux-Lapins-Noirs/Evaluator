@@ -1,0 +1,3 @@
+Build = "Full"
+BuildCommand = "cp fichier.out duplicate.out"
+Tolerance = false

@@ -1,0 +1,3 @@
+Build = "Object"
+SearchCommand = "echo 'fichier'"
+BuildCommand = "echo '%s' > fichier.out"

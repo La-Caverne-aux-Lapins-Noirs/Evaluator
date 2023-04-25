@@ -1,0 +1,133 @@
+
+Utilisation du logiciel
+=======================
+
+ Le TechnoCentre prend autant de paramètres qu'on le souhaite. Chaque paramètre est un dossier
+ dans lequel le logicel va se rendre afin d'effectuer une correction.
+
+ Le TechnoCentre attend dans le dossier de correction la présence d'un fichier activity.dab.
+ Il attend optionnellement un fichier authorized.dab contenant les fonctions autorités pour l'évaluation.
+
+ Le TechnoCentre néccessite, si il est en debug, la présence d'un fichier dictionnary.dab situé dans
+ le même dossier que lui. Si il est en prod, le fichier doit être /etc/technocore/dictionnary.dab
+
+ Le TechnoCentre néccessite, si il est en debug, la présence d'un fichier configuration.dab situé dans
+ le même dossier que lui. Si il est en prod, le fichier doit être /etc/technocore/configuration.dab
+
+Organisation générale d'un fichier de description d'activité
+============================================================
+
+ Le format de fichier de configuration du TechnoCentre est le DABSIC.
+
+ La configuration générale de l'activité peut ou doit comporter:
+  - Un champ "Language" valant par défaut "EN". Actuellement "FR" est également supporté.
+    Ce champ détermine la langue utilisée dans les rapports envoyés aux élèves corrigés.
+  - Un champ "MaximumRam" permettant de limiter la RAM consommé pour un seul élève dans l'allocateur
+    de la LibLapin. Par défaut, c'est 2Mo.
+  - Un tableau "Exercises" dont chaque case est un "bloc d'évaluation", terme utilisé par la suite.
+    Les blocs d'evaluation sont executés dans l'ordre.
+
+ Chaque bloc d'évaluation doit ou peu comporter:
+  - Un champ "Name".
+  - Un champ "Type". Par défaut, il faut "Function".
+    Deux autres valeurs sont valables: "Program" et "Builtin".
+  - Un champ StopOnFailure valant faux par défaut.
+    Si il est vrai, un échec a l'exercice cesse la totalité de l'évaluation.
+
+Evaluation de fonction
+======================
+
+ Un bloc d'evaluation de fonction doit comporter les champs suivants:
+
+ Module = "/usr/lib/technocore/abs.so" 'Indique que le programme de correction à employer
+ Evaluator = "evaluate_abs" 'Optionnel. La fonction de test. Si absent, c'est module_main qui est utilisé
+ UserLibrary = "./libstudent.so" 'La bibliothèque compilé de l'élève contenant les fonctions a tester
+ FunctionName = "hbs_abs" 'Le nom de la fonction de l'éleve à tester
+ TestName = "test_hbs_abs" 'Le nom de la fonction de test de l'élève à tester aussi
+
+ Ci-dessous la liste des champs utilisable dans le cadre d'une évaluation de fonction.
+ Les valeurs par défaut sont renseignée. Le commentaire indique le sens du champ.
+
+ Evaluation = true 'Y a t il une fonction à tester? (Ce test teste -en gros- une fonction dans ses bases)
+ EvaluationMandatory = true 'Indique que l'exercice est un échec si le test associé est un echec
+ EvaluationMedals = "" ' Liste des médailles acquise en cas de succès. Autant qu'on veut.
+
+ FullEvaluation = true 'Est ce que la fonction doit être évaluée à 100% de sa capacité métier?
+ FullEvaluationMandatory = true
+ FullEvaluationMedals = ""
+
+ DefensiveProgramming = false 'Est ce que la fonction doit résister à une utilisation frauduleuse?
+ DefensiveProgrammingMandatory = false
+ DefensiveProgrammingMedals = ""
+
+ ReportError = true 'Est ce que le code d'erreur de retour doit être évalué?
+ ReportErrorMandatory = true
+ ReportErrorMedals = ""
+
+ UseErrno = false 'Est ce que les codes de errno en cas d'erreur doivent être testé?
+ UseErrnoMandatory = false
+ UseErrnoMedals = ""
+
+ ' -1 indique l'absence de test de performence.
+ ' Si le nombre est supérieur à zéro, c'est alors le ratio vitesse_eleve / vitesse_correction maximum
+ ' toléré. Exemple: Si il vaut 2, alors la fonction élève peut être au maximum deux fois plus lente.
+ MaximumPerfRatio = -1
+ MaximumPerfRatioMandatory = false
+ MaximumPerfRatioMedals = ""
+
+ ' -1 indique l'absence de test de consommation mémoire.
+ ' De la même manière que pour la performence, c'est le ratio eleve / correction limite
+ MaximumRamRatio = -1
+ MaximumRamRatioMandatory = false
+ MaximumRamRatioMedals = ""
+
+ Test = true 'Est ce que l'on doit tester la fonction de test?
+ TestMandatory = true
+ TestMedals = ""
+
+ FullTesting = true 'Est ce que l'on doit tester la fonction de test à 100% de sa capacité métier?
+ FullTestingMandatory = true
+ FullTestingMedals = ""
+
+ DefensiveTesting = false 'Est ce que l'on doit verifier que des tests de prog defensives sotn faites?
+ DefensiveTestingMandatory = true
+ DefensiveTestingMedals = ""
+
+ ErrorTesting = true 'Est ce que l'on verifie que les tests verifie les cas d'erreur, au moins au code?
+ ErrorTestingMandatory = true
+ ErrorTestingMedals = ""
+
+ ErrnoTesting = false 'Est ce que l'on verifie que les codes d'errno sont testés?
+ ErrnoTestingMandatory = false
+ ErrnoTestingMedals = ""
+
+Evaluation de programme
+=======================
+
+Le type "Program" permet de lancer un programme a priori utilisateur et de maintenir une connexion forte avec lui durant l'ensemble de son execution.
+
+Le champ "Command" indique quelle est la commande permettant de lancer le programme a tester.
+Le champ "Environ" indique quel est l'environnement de lancement. Si Environ n'est pas présent, l'environnement original est préservé.
+Le champ "ReturnValue" indique qu'il y a une valeur attendu a la fin du programme et de laquelle il s'agit.
+Un champ "Timeout" peut etre precisé, en seconde.
+
+Le tableau "Interaction" comprend deux champs: Input (du programme) et Output (du programme), pouvant être absent ou valant chaine vide. Input est toujours exploité avant Output. Input effectue une demande d'écriture vers le programme et Output la réponse attendue.
+
+Execution de commande arbitraire
+================================
+
+ Le Module "Command" de type "Builtin" contient un unique champ "Command" pouvant être une chaine
+ de caractère ou un tableau de chaine de caractère. Les commandes qu'il contient sont executés dans l'ordre.
+ Dès la première erreur, le module cesse et signale un échec. Si le champ Command est absent, c'est un
+ échec critique qui est signalé.
+
+Module d'hygiène
+================
+
+ Le module "Cleanliness" de type "Builtin" contient les champs suivants:
+ - Products (string ou tableau de string) indiquant quels sont censés être les produits de compilation du projet,
+   et qui sont donc censé être absent...
+
+Contenu du fichier authorized.dab
+=================================
+
