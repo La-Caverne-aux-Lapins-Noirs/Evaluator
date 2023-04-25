@@ -116,8 +116,7 @@ clean:
 			 $(ECHO) $(RED) "Error in clean rule!" $(DEFLT)
 			@(cd test/ && $(MAKE) --no-print-directory clean)
 fclean:			clean
-			@find .     -name "*.so" -delete			\
-				-or -name "*.exe" -delete			\
+			@find .     -name "*.exe" -delete			\
 				-or -name "*.a" -delete				\
 				-or -name "*.o" -delete				\
 				-or -name "*~" -delete

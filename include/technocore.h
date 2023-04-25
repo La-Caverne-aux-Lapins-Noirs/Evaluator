@@ -9,7 +9,6 @@
 # define		__TECHNOCORE_H__
 # include		<stdbool.h>
 # include		"technocore_api.h"
-# include		"norm.h"
 
 #ifdef			NDEBUG
 

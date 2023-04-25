@@ -5,3 +5,7 @@
 *.gcno
 *.gcda
 *.a
+program
+*.tar.gz
+*.tgz
+*.out

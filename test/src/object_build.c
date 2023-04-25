@@ -70,7 +70,7 @@ int			main(void)
   assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[0].Status"));
   assert(strcmp(str, "Warning") == 0);
   assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[0].Message"));
-  assert(strstr(str, "warning: initialization makes pointer "));
+  assert(strstr(str, "makes pointer from integer"));
 
   /// IL Y A UN WARNING ET ON NE L'ACCEPTE PAS
 
@@ -85,7 +85,7 @@ int			main(void)
   assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[0].Status"));
   assert(strcmp(str, "Warning") == 0);
   assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[0].Message"));
-  assert(strstr(str, "warning: initialization makes pointer "));
+  assert(strstr(str, "makes pointer from integer"));
 
   /// IL Y A DES ERREURS
 
@@ -101,7 +101,7 @@ int			main(void)
   assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[0].Status"));
   assert(strcmp(str, "Warning") == 0);
   assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[0].Message"));
-  assert(strstr(str, "warning: initialization makes pointer "));
+  assert(strstr(str, "makes pointer from integer"));
 
   assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[1].File"));
   assert(strcmp(str, "./error.c") == 0);
