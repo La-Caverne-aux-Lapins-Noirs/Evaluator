@@ -105,6 +105,7 @@ check:			$(TESTLIB)
 
 install:
 			@$(CP) $(NAME) $(BIN_DIR)
+			@$(CP) $(TESTLIB) $(LIB_DIR)
 			@$(CP) $(CNF) $(ETC_DIR)
 			@$(CP) $(INC) $(INC_DIR)
 rmlog:
