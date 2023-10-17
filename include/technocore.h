@@ -106,6 +106,7 @@ t_builtin_module	evaluate_mcq;
 t_builtin_module	evaluate_style;
 t_builtin_module	execute_command;
 t_builtin_module	evaluate_cheat;
+t_builtin_module	evaluate_file_c_norm;
 
 // Sous fonction de evaluate_construction
 t_builtin_module	evaluate_make_build;

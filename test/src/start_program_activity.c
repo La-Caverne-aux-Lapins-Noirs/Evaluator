@@ -18,13 +18,15 @@ int			main(void)
   assert(dict_open());
   dict_set_language("FR");
   assert(act.current_report = bunny_new_configuration());
-  
+
+ Test1:
   t_bunny_configuration *empty = bunny_new_configuration();
   const char *msg;
 
   assert(start_program_activity("empty", empty, empty, &act) == TC_CRITICAL);
   assert(strcmp(gl_technocore.error_buffer.message, "empty: Missing Command field for program test .\n") == 0);
-  
+
+ Test2:
   const char		*code =
     "\n"
     "[Local\n"
@@ -74,17 +76,27 @@ int			main(void)
   assert(bunny_configuration_getf(act.current_report, &tmp, "Message[0]"));
   assert(strcmp(cmp, tmp) == 0);
 
+ Test3:
   // Deux interactions
   const char		*code2 =
     "\n"
     "[Local\n"
     "  Name = \"Test\"\n"
-    "  Command = \"echo 'Test' && echo -n 'Test2'\"\n"
-    "  Timeout = 2\n"
+    "  Command = \"cat\"\n"
+    "  Timeout = 5\n"
     "  ReturnValue = 0\n"
     "  {Interactions\n"
     "    [\n"
-    "      Output = \"Test\\n\", \"Test2\"\n"
+    "      Input = \"Test\\n\"\n"
+    "      Output = \"Test\\n\"\n"
+    "    ],\n"
+    "    [\n"
+    "      Input = \"Test2\\n\"\n"
+    "      Output = \"Test2\\n\"\n"
+    "    ],\n"
+    "    [\n"
+    "      Input = \"\"\n"
+    "      Output = \"\"\n"
     "    ]\n"
     "  }\n"
     "]"
@@ -95,11 +107,37 @@ int			main(void)
   assert((act.current_report = bunny_new_configuration()));
 
   snprintf(buffer, sizeof(buffer), code2);
-  bunny_set_error_descriptor(2);
   assert(global = bunny_read_configuration(BC_DABSIC, buffer, NULL));
   // bunny_save_configuration(BC_DABSIC, "/dev/stderr", global);
   assert(bunny_configuration_getf(global, &local, "Local"));
   assert(start_program_activity("aaa", global, local, &act) == TC_SUCCESS);
+  bunny_delete_configuration(global);
+
+ Test4:
+  // Timeout
+  const char		*code3 =
+    "\n"
+    "[Local\n"
+    "  Name = \"Test\"\n"
+    "  Command = \"cat\"\n"
+    "  Timeout = 1\n"
+    "  ReturnValue = 0\n"
+    "  {Interactions\n"
+    "    [\n"
+    "      Output = \"Timeout is coming\"\n"
+    "    ]\n"
+    "  }\n"
+    "]"
+    ;
+
+  bunny_delete_configuration(act.current_report);
+  memset(&act, 0, sizeof(act));
+  assert((act.current_report = bunny_new_configuration()));
+
+  snprintf(buffer, sizeof(buffer), code3);
+  assert(global = bunny_read_configuration(BC_DABSIC, buffer, NULL));
+  assert(bunny_configuration_getf(global, &local, "Local"));
+  assert(start_program_activity("aaa", global, local, &act) == TC_FAILURE);
   bunny_delete_configuration(global);
 
   return (EXIT_SUCCESS);

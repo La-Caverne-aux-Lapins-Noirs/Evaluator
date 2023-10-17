@@ -14,10 +14,19 @@
 #include			<errno.h>
 #include			"technocore.h"
 
-static void			siguser(int					x)
+int				__stdin;
+int				__stdout;
+
+static void			siguser1(int					x)
 {
-  if (x == SIGUSR1)
-    if (write(1, "TIMEOUT", 7)) {}
+  close(__stdin);
+  exit(x);
+}
+
+static void			siguser2(int					x)
+{
+  close(__stdout);
+  return ;
 }
 
 static t_technocore_result	interaction(const char				*argv0,
@@ -30,17 +39,20 @@ static t_technocore_result	interaction(const char				*argv0,
 {
   const char			*input;
   const char			*output;
+  int				len;
 
   if (bunny_configuration_getf(cnf, &input, "Input"))
     {
-      if (write(in, input, strlen(input)) == -1)
-	{
+      if ((len = strlen(input)) == 0)
+	close(in);
+      else if (write(in, input, len) == -1)
+	{ // LCOV_EXCL_START
 	  add_message
 	    (&gl_technocore.error_buffer,
 	     "%s: Cannot write data to program for program test %s:%s.\n",
 	     argv0, name, strerror(errno));
 	  return (TC_CRITICAL);
-	}
+	} // LCOV_EXCL_STOP
     }
   if (bunny_configuration_getf(cnf, &output, "Output"))
     {
@@ -48,43 +60,54 @@ static t_technocore_result	interaction(const char				*argv0,
 
       if ((ret = read(out, bunny_big_buffer, sizeof(bunny_big_buffer) - 1)) == -1)
 	{
-	  add_message
-	    (&gl_technocore.error_buffer,
-	     "%s: Cannot read data from program for program test %s:%s.\n",
-	     argv0, name, strerror(errno));
-	  return (TC_CRITICAL);
+	  if (errno == EINTR || errno == EBADF)
+	    ret = 0;
+	  else
+	    { // LCOV_EXCL_START
+	      add_message
+		(&gl_technocore.error_buffer,
+		 "%s: Cannot read data from program for program test %s:%s.\n",
+		 argv0, name, strerror(errno));
+	      return (TC_CRITICAL);
+	    } // LCOV_EXCL_STOP
 	}
       bunny_big_buffer[ret] = '\0';
 
-      if (strcmp(bunny_big_buffer, "TIMEOUT") == 0)
+      if (ret == 0)
 	{
+	  if (*output != '\0')
+	    return (do_string_diff(act, name, bunny_big_buffer, "EOF", -1)); // LCOV_EXCL_LINE
+	  return (TC_SUCCESS);
+	}
+      if (strcmp(bunny_big_buffer, "TIMEOUT") == 0)
+	{ // LCOV_EXCL_START
 	  if (add_exercise_message(act, dict_get_pattern("Timeout"), maxtm) == false)
 	    {
 	      add_message(&gl_technocore.error_buffer, "%s: Cannot mark timeout for program test %s.\n", argv0, name);
 	      return (TC_CRITICAL);
 	    }
 	  return (TC_FAILURE);
-	}
+	} // LCOV_EXCL_STOP
       if (strcmp(bunny_big_buffer, "DUPFAIL") == 0)
-	{
+	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "%s: Error while duping fds in program test %s.\n", argv0, name);
 	  return (TC_CRITICAL);
-	}
+	} // LCOV_EXCL_STOP
       if (strcmp(bunny_big_buffer, "SIGNALFAIL") == 0)
-	{
+	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "%s: Error while setting sighandler in program test %s.\n", argv0, name);
 	  return (TC_CRITICAL);
-	}
+	} // LCOV_EXCL_STOP
       if (strcmp(bunny_big_buffer, "MALLOCFAIL") == 0)
-	{
+	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "%s: Error allocating environment for program test %s.\n", argv0, name);
 	  return (TC_CRITICAL);
-	}
+	} // LCOV_EXCL_STOP
       if (strcmp(bunny_big_buffer, "NO_EXECUTION") == 0)
-	{
+	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "%s: Program %s was not run for unknown reason.\n", argv0, name);
 	  return (TC_CRITICAL);
-	}
+	} // LCOV_EXCL_STOP
 
       return (do_string_diff(act, name, bunny_big_buffer, output, -1));
     }
@@ -102,6 +125,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
   const char			*shcall[4] = {"/bin/sh", "-c", NULL, NULL};
   int				inpipe[2];
   int				outpipe[2];
+  int				opid = getpid();
   pid_t				pid;
   int				return_value = INT_MAX;
   int				timeout = 2;
@@ -147,21 +171,21 @@ t_technocore_result		start_program_activity(const char		*argv0,
       goto CloseOutputPipe;
     } // LCOV_EXCL_STOP
   else if (pid == 0)
-    {
+    { // LCOV_EXCL_START
       t_bunny_configuration	*env;
 
       close(inpipe[1]);
       close(outpipe[0]);
       if (dup2(inpipe[0], STDIN_FILENO) == -1 || dup2(outpipe[1], STDOUT_FILENO) == -1)
-	{ // LCOV_EXCL_START
+	{
 	  if (write(outpipe[1], "DUPFAIL", 7)) {}
 	  exit(EXIT_FAILURE);
-	} // LCOV_EXCL_STOP
-      if (signal(SIGUSR1, siguser) == SIG_ERR)
-	{ // LCOV_EXCL_START
+	}
+      if (signal(SIGTERM, siguser1) == SIG_ERR)
+	{
 	  if (write(1, "SIGNALFAIL", 10)) {}
 	  exit(EXIT_FAILURE);
-	} // LCOV_EXCL_STOP
+	}
       if (bunny_configuration_getf(exe_cnf, &env, "Environ") == false)
 	execvp(shcall[0], (char**)shcall);
       else
@@ -171,10 +195,10 @@ t_technocore_result		start_program_activity(const char		*argv0,
 
 	  nbr_env = bunny_configuration_casesf(env, ".") + 1;
 	  if ((environ = malloc(nbr_env * sizeof(*environ))) == NULL)
-	    { // LCOV_EXCL_START
+	    {
 	      if (write(1, "MALLOCFAIL", 11)) {}
 	      exit(EXIT_FAILURE);
-	    } // LCOV_EXCL_STOP
+	    }
 	  int			i;
 
 	  for (i = 0; i < nbr_env; ++i)
@@ -182,11 +206,11 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	  environ[i] = NULL;
 	  execvpe(shcall[0], (char**)shcall, (char**)environ);
 	}
-      // LCOV_EXCL_START
       if (write(1, "NO_EXECUTION", 11)) {}
       exit(EXIT_FAILURE);
-      // LCOV_EXCL_STOP
-    }
+    } // LCOV_EXCL_STOP
+  close(inpipe[0]);
+  close(outpipe[1]);
   pid_t				watchdog;
 
   // On crée un processus qui va descendre le programme si il met plus de TIMEOUT a finir.
@@ -196,38 +220,41 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	(&gl_technocore.error_buffer,
 	 "%s: Cannot create processsus for program test %s:%s.\n",
 	 argv0, name, strerror(errno));
-      goto CloseOutputPipe;
+      goto KillProcess;
     } // LCOV_EXCL_STOP
   else if (watchdog == 0)
-    {
-      close(inpipe[0]);
-      close(outpipe[1]);
+    { // LCOV_EXCL_START
+      // Ces pipes n'étaient pas pour nous...
+      close(inpipe[1]);
+      close(outpipe[0]);
       bunny_usleep(timeout * 1e6);
       int out = kill(pid, SIGTERM) == -1 && errno == ESRCH ? EXIT_SUCCESS : EXIT_FAILURE;
-      // printf("Exiting with code %d\n", out);
+      kill(opid, SIGUSR2);
       exit(out);
-    }
+    } // LCOV_EXCL_STOP
+
+  // Pour éviter d'etre coincé dans read coté evaluator
+  __stdout = outpipe[0];
+  if (signal(SIGUSR2, siguser2) == SIG_ERR)
+    goto KillProcess2;
 
   t_bunny_configuration		*cnf;
   int				status;
   int				wstatus;
 
-  close(inpipe[0]);
-  close(outpipe[1]);
   for (int i = 0; bunny_configuration_getf(exe_cnf, &cnf, "Interactions[%d]", i); ++i)
     if ((result = interaction(argv0, name, act, cnf, inpipe[1], outpipe[0], timeout)) == TC_CRITICAL)
-      goto KillProcess;
+      goto KillProcess2; // LCOV_EXCL_LINE
 
-  ////////////////// IL FAUDRAIT QUE LE PROCESSUS LANCE TUE LE WATCHDOG POUR EVITER
-  //// QUE LE WATCHDOG IMPLIQUE TOUT LE DELAI DE TIMEOUT!!!
-  
-  // On termine les processus
-  kill(watchdog, SIGTERM);
-  waitpid(pid, &status, 0);
-  waitpid(watchdog, &wstatus, 0);
   // On ferme les moyens de communication
   close(inpipe[1]);
   close(outpipe[0]);
+
+  // Le watchdog qui empeche que command reste coincé dans read
+  kill(watchdog, SIGTERM);
+  waitpid(watchdog, &wstatus, 0);
+  // Le programme, s'il n'est pas mort
+  waitpid(pid, &status, 0);
 
   // Si on a timeout...
   if (wstatus == EXIT_FAILURE)
@@ -237,8 +264,9 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	  add_message(&gl_technocore.error_buffer, "%s: Cannot mark timeout for program test %s.\n", argv0, name);
 	  return (TC_CRITICAL);
 	}
+      return (TC_FAILURE);
     }
-
+  
   // Si on a demandé à vérifier la valeur de retour...
   if (return_value != INT_MAX)
     {
@@ -252,11 +280,12 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	  return (TC_FAILURE);
 	}
     }
-
   // Tout est nickel, on s'en va
   return (result);
 
   // Les cas d'erreurs.
+ KillProcess2:
+  kill(watchdog, SIGTERM);
  KillProcess:
   kill(pid, SIGTERM);
  CloseOutputPipe:
