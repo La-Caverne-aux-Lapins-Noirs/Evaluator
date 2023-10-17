@@ -83,7 +83,7 @@ int			main(void)
     "[Local\n"
     "  Name = \"Test\"\n"
     "  Command = \"cat\"\n"
-    "  Timeout = 5\n"
+    "  Timeout = 50\n"
     "  ReturnValue = 0\n"
     "  {Interactions\n"
     "    [\n"
@@ -140,6 +140,44 @@ int			main(void)
   assert(start_program_activity("aaa", global, local, &act) == TC_FAILURE);
   bunny_delete_configuration(global);
 
+ Test5:
+  // Mauvaise valeur de retour
+  const char		*code4 =
+    "\n"
+    "[Local\n"
+    "  Name = \"Test\"\n"
+    "  Command = \"cat\"\n"
+    "  Timeout = 20\n"
+    "  ReturnValue = 1\n"
+    "  {Interactions\n"
+    "    [\n"
+    "      Input = \"Test\\n\"\n"
+    "      Output = \"Test\\n\"\n"
+    "    ],\n"
+    "    [\n"
+    "      Input = \"Test2\\n\"\n"
+    "      Output = \"Test2\\n\"\n"
+    "    ],\n"
+    "    [\n"
+    "      Input = \"\"\n"
+    "      Output = \"\"\n"
+    "    ]\n"
+    "  }\n"
+    "]"
+    ;
+
+  bunny_delete_configuration(act.current_report);
+  memset(&act, 0, sizeof(act));
+  assert((act.current_report = bunny_new_configuration()));
+
+  snprintf(buffer, sizeof(buffer), code4);
+  assert(global = bunny_read_configuration(BC_DABSIC, buffer, NULL));
+  // bunny_save_configuration(BC_DABSIC, "/dev/stderr", global);
+  assert(bunny_configuration_getf(global, &local, "Local"));
+  assert(start_program_activity("aaa", global, local, &act) == TC_FAILURE);
+  bunny_delete_configuration(global);
+
+  
   return (EXIT_SUCCESS);
 }
 

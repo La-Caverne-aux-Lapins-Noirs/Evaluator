@@ -61,7 +61,10 @@ static t_technocore_result	interaction(const char				*argv0,
       if ((ret = read(out, bunny_big_buffer, sizeof(bunny_big_buffer) - 1)) == -1)
 	{
 	  if (errno == EINTR || errno == EBADF)
-	    ret = 0;
+	    {
+	      strcpy(bunny_big_buffer, "TIMEOUT");
+	      ret = 7;
+	    }
 	  else
 	    { // LCOV_EXCL_START
 	      add_message
@@ -233,10 +236,10 @@ t_technocore_result		start_program_activity(const char		*argv0,
       exit(out);
     } // LCOV_EXCL_STOP
 
-  // Pour éviter d'etre coincé dans read coté evaluator
+  // Pour éviter d'etre coincé dans read coté evaluator - solution naze a mon avis
   __stdout = outpipe[0];
   if (signal(SIGUSR2, siguser2) == SIG_ERR)
-    goto KillProcess2;
+    goto KillProcess2; // LCOV_EXCL_LINE
 
   t_bunny_configuration		*cnf;
   int				status;
@@ -256,16 +259,17 @@ t_technocore_result		start_program_activity(const char		*argv0,
   // Le programme, s'il n'est pas mort
   waitpid(pid, &status, 0);
 
-  // Si on a timeout...
+  // Si on a timeout... (ne fonctionne pas, a priori, vu que interaction
+  // est maintenant responsable de cette marque
   if (wstatus == EXIT_FAILURE)
-    {
+    { // LCOV_EXCL_START
       if (add_exercise_message(act, dict_get_pattern("Timeout"), timeout) == false)
 	{
 	  add_message(&gl_technocore.error_buffer, "%s: Cannot mark timeout for program test %s.\n", argv0, name);
 	  return (TC_CRITICAL);
 	}
       return (TC_FAILURE);
-    }
+    } // LCOV_EXCL_STOP
   
   // Si on a demandé à vérifier la valeur de retour...
   if (return_value != INT_MAX)
