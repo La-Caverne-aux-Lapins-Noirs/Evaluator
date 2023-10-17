@@ -287,6 +287,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
   // Tout est nickel, on s'en va
   return (result);
 
+  // LCOV_EXCL_START
   // Les cas d'erreurs.
  KillProcess2:
   kill(watchdog, SIGTERM);
@@ -299,4 +300,5 @@ t_technocore_result		start_program_activity(const char		*argv0,
   close(inpipe[0]);
   close(inpipe[1]);
   return (TC_CRITICAL);
+  // LCOV_EXCL_STOP
 }
