@@ -72,7 +72,8 @@
   ForbiddenFunction = "You have used forbidden function.\n"
   NoForbiddenFunction = "No forbidden fonction were detected.\n"
   StringsAreDifferent = "%s: Strings are different.\nYour string, and then our:\n%s\n%s\n%*c\n"
-  BadReturnValue = "Bad return value %d. %d was expected."
+  BadReturnValue = "Bad return value %d. %d was expected.\n"
+  TooManyNormError = "Your code contains too many coding rules error. Maximum amount of error points tolerated was %d and %d were acquired for %d mistakes.\n"
 ]
 
 
@@ -148,6 +149,7 @@
   ForbiddenFunction = "Vous avez utilisé des fonctions interdites.\n"
   NoForbiddenFunction = "Aucune fonction interdite n'a été détécté.\n"
   StringsAreDifferent = "%s: Les chaines de caractères ne correspondent pas.\nVotre chaine, puis la notre:\n%s\n%s\n%*c\n"
-  BadReturnValue = "Mauvaise valeur de retour. %d a été obtenu, %d était attendu."
+  BadReturnValue = "Mauvaise valeur de retour. %d a été obtenu, %d était attendu.\n"
+  TooManyNormError = "Votre code contient trop d'infractions au code de rédaction. Le maximum admissible de points d'erreur était de %d et %d points ont été obtenus du fait des %d erreurs ayant été détéctées.\n"
 ]
 

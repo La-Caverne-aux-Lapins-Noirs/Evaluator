@@ -25,6 +25,7 @@ static void			siguser1(int					x)
 
 static void			siguser2(int					x)
 {
+  (void)x;
   close(__stdout);
   return ;
 }
@@ -122,7 +123,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
 						       t_bunny_configuration	*exe_cnf,
 						       t_technocore_activity	*act)
 {
-  t_technocore_result		result;
+  t_technocore_result		result = TC_SUCCESS;;
   const char			*name;
   const char			*command;
   const char			*shcall[4] = {"/bin/sh", "-c", NULL, NULL};

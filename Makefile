@@ -22,6 +22,7 @@
   COMPILER	?=	gcc
   LINKER	?=	gcc -o
   TESTLINKER	?=	gcc -shared -fprofile-arcs $(LIB) -o
+#  TESTLINKER	?=	ar rcs
 
   BIN_DIR	?=	/usr/bin/
   LIB_DIR	?=	/usr/lib/
