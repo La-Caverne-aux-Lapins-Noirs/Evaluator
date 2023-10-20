@@ -26,7 +26,8 @@ bool			retrieve_all_files(char			*path,
   struct dirent		*dirent;
 
   basepath = &path[curlen = strlen(path)];
-  dir = opendir(path);
+  if ((dir = opendir(path)) == false)
+    return (false);
   while ((dirent = readdir(dir)))
     {
       if (dirent->d_name[0] == '.')
@@ -42,9 +43,11 @@ bool			retrieve_all_files(char			*path,
 	}
       else
 	{
-	  if (curlen + strlen(dirent->d_name) >= maxpath)
+	  if (curlen + strlen(dirent->d_name) + 1 < maxpath)
 	    {
-	      strcat(basepath, dirent->d_name);
+	      basepath[0] = '/';
+	      basepath[1] = '\0';
+	      strcat(&basepath[1], dirent->d_name);
 	      if (!retrieve_all_files(path, maxpath, files, browse, cells, cellsize, ext))
 		return (false);
 	      *basepath = '\0';

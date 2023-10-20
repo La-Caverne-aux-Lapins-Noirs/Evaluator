@@ -16,7 +16,7 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
 					 t_bunny_configuration	*exe,
 					 t_technocore_activity	*act)
 {
-  char			basepath[512];
+  char			basepath[512] = ".";
   char			*files[1024 * 8];
   size_t		cnt;
   t_parsing		p;
@@ -31,13 +31,13 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
   cnt = 0;
   memset(&p, 0, sizeof(p));
   if (!retrieve_all_files(basepath, NBRCELL(basepath), files, &cnt, NBRCELL(files), MAXPATH, ".c"))
-    {
+    { // LCOV_EXCL_START
       add_message(&gl_technocore.error_buffer, "Cannot retrieve all %s files from repository.\n", ".c");
       return (TC_CRITICAL);
-    }
+    } // LCOV_EXCL_STOP
   load_norm_configuration(&p, exe);
 
-  for (size_t j = 0; j < cnt; ++cnt)
+  for (size_t j = 0; j < cnt; ++j)
     {
       char		*code;
 
@@ -46,23 +46,22 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
 	return (TC_CRITICAL);
       i = 0;
       read_translation_unit(&p, files[j], code, &i, false);
-      free(code);
     }
 
   for (int j = 0; j < p.last_error_id;  ++j)
     if (add_exercise_message(act, p.last_error_msg[j]) == false)
-      {
+      { // LCOV_EXCL_START
 	add_message(&gl_technocore.error_buffer, "Cannot add norm messages.\n");
 	return (TC_CRITICAL);
-      }
+      } // LCOV_EXCL_STOP
   
-  if (p.nbr_error_points > p.maximum_error_points)
+  if (p.maximum_error_points != -1 && p.nbr_error_points > p.maximum_error_points)
     {
       if (add_exercise_message(act, dict_get_pattern("TooManyNormError"), p.maximum_error_points, p.nbr_error_points, p.nbr_mistakes) == false)
-	{
-	  add_message(&gl_technocore.error_buffer, "Cannot add norm messages.\n");
+	{ // LCOV_EXCL_START
+	  add_message(&gl_technocore.error_buffer, "Cannot add norm conclusion.\n");
 	  return (TC_CRITICAL);
-	}
+	} // LCOV_EXCL_STOP
       return (TC_FAILURE);
     }
 

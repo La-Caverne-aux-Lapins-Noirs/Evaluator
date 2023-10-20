@@ -18,8 +18,19 @@ int			main(void)
   memset(&act, 0, sizeof(act));
   assert(act.current_report = bunny_new_configuration());
 
-  assert(chdir("./test/norm/") == 0);
+  if (chdir("./test/src/res/") != 0)
+    if (chdir("./src/res/") != 0)
+      assert(chdir("./res/") == 0);
+  
   assert(cnf = bunny_open_configuration("./cln.dab", NULL));
+  
+  assert(chdir("norm/success") == 0);
+  assert(evaluate_file_c_norm("norm", NULL, cnf, &act) == TC_SUCCESS);
 
+  assert(chdir("../") == 0);
+  assert(chdir("failure") == 0);
+  assert(evaluate_file_c_norm("norm", NULL, cnf, &act) == TC_FAILURE);
+
+  return (0);
 }
 
