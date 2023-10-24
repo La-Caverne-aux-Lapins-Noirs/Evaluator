@@ -22,6 +22,8 @@
  **                                         **
  *********************************************]
 
+Tolerance = 0
+
 [!Header
   'Un ensemble de texte qui DOIT marquer le début de chaque fichier
   'Si aucun en-tête n'est défini, Crawler ne pourra pas verifier le style.
@@ -431,7 +433,7 @@ PASCAL_CASE = 3 'ThisIsIt
 ]
 
 [ReturnForbidden
-  Value = true
+  Value = false
   Points = 5
 ]
 

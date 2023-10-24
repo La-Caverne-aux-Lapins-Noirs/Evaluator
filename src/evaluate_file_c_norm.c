@@ -42,13 +42,13 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
       char		*code;
 
       // Pour chaque fichier .c
-      if ((code = load_c_file(files[j], exe, true)) == NULL)
+      if ((code = load_c_file(files[j], exe, false)) == NULL)
 	return (TC_CRITICAL);
       i = 0;
       read_translation_unit(&p, files[j], code, &i, false);
     }
 
-  for (int j = 0; j < p.last_error_id;  ++j)
+  for (int j = 0; j <= p.last_error_id;  ++j)
     if (add_exercise_message(act, p.last_error_msg[j]) == false)
       { // LCOV_EXCL_START
 	add_message(&gl_technocore.error_buffer, "Cannot add norm messages.\n");

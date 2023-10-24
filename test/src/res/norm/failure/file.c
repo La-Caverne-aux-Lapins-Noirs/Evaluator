@@ -3,7 +3,8 @@
 #include <stdlib.h>
 
 int main() {
-  puts("Hello, world!");
+  if (!0)
+    puts("Hello, world!");
   return (EXIT_SUCCESS);
 }
 
