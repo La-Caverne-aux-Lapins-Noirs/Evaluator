@@ -72,7 +72,17 @@
   ForbiddenFunction = "You have used forbidden function.\n"
   NoForbiddenFunction = "No forbidden fonction were detected.\n"
   StringsAreDifferent = "%s: Strings are different.\nYour string, and then our:\n%s\n%s\n%*c\n"
-  BadReturnValue = "Bad return value %d. %d was expected."
+  BadReturnValue = "Bad return value %d. %d was expected.\n"
+  TooManyNormError = "Your code contains too many coding rules error. Maximum amount of error points tolerated was %d and %d were acquired for %d mistakes.\n"
+
+  NoAnswersFound = "No answers for the current MCQ were found.\n"
+  InvalidAnswerFile = "Your answers file is invalid. If you think it may be a mistake on our side, please contact your teacher.\n"
+    
+  MCQBadAnswer = "Question '%s': invalid answer.\n"
+  MCQIncompleteAnswer = "Question '%s': incomplete answer.\n"
+  MCQWasMandatory = "Last question was mandatory.\n"
+  MCQFailure = "Failure. %d points acquired. Minimum is %d. Maximum is %d.\n"
+  MCQSuccess = "Success. %d points acquired. Minimum is %d. Maximum is %d.\n"
 ]
 
 
@@ -148,6 +158,16 @@
   ForbiddenFunction = "Vous avez utilisé des fonctions interdites.\n"
   NoForbiddenFunction = "Aucune fonction interdite n'a été détécté.\n"
   StringsAreDifferent = "%s: Les chaines de caractères ne correspondent pas.\nVotre chaine, puis la notre:\n%s\n%s\n%*c\n"
-  BadReturnValue = "Mauvaise valeur de retour. %d a été obtenu, %d était attendu."
+  BadReturnValue = "Mauvaise valeur de retour. %d a été obtenu, %d était attendu.\n"
+  TooManyNormError = "Votre code contient trop d'infractions au code de rédaction. Le maximum admissible de points d'erreur était de %d et %d points ont été obtenus du fait des %d erreurs ayant été détéctées.\n"
+
+  NoAnswersFound = "Aucune réponse n'a été trouvée pour le questionnaire.\n"
+  InvalidAnswerFile = "Le fichier réponse que vous avez fourni est incorrect. Si vous pensez qu'il s'agit d'une erreur, entrez en contact avec votre enseignant.\n"
+
+  MCQBadAnswer = "Question '%s': réponse invalide.\n"
+  MCQIncompleteAnswer = "Question '%s': réponse incompllète.\n"
+  MCQWasMandatory = "La dernière question était obligatoire.\n"
+  MCQFailure = "Score insuffisant. %d points acquis. Le minimum était de %d. Le maximum de %d.\n"
+  MCQSuccess = "Succès. %d points acquis. Le minimum était de %d. Le maximum de %d.\n\n"
 ]
 

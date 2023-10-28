@@ -35,7 +35,9 @@ t_technocore_result	start_activity(const char			*argv0,
   t_bunny_configuration	*act;
   t_technocore_result	res;
   const char		*str;
+  int			failedcnt;
 
+  failedcnt = 0;
   res = TC_CRITICAL;
   memset(&tech, 0, sizeof(tech));
   if ((tech.report = bunny_new_configuration()) == NULL)
@@ -89,10 +91,16 @@ t_technocore_result	start_activity(const char			*argv0,
       if (res == TC_FAILURE)
 	{
 	  bool		stop_on_failure = false;
+	  int		max_failure = -1;
 
+	  failedcnt += 1;
 	  // Si l'exercice est bloquant, on arrête la.
 	  if (bunny_configuration_getf(act, &stop_on_failure, "StopOnFailure") == false)
 	    bunny_configuration_getf(cnf, &stop_on_failure, "StopOnFailure");
+	  // On peut aussi tolérer une quantité d'erreur determinée
+	  bunny_configuration_getf(cnf, &max_failure, "MaximumFailure");
+	  if (max_failure > -1 && failedcnt > max_failure)
+	    stop_on_failure = true;
 	  if (stop_on_failure)
 	    goto DeleteTA;
 	}

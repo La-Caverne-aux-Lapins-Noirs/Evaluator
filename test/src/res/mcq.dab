@@ -1,0 +1,44 @@
+
+IfFullCorrect=3
+IfIncomplete=2
+IfWrong=-1
+AnswersFile = @"answers.csv"
+
+{Questions
+  [
+    Question = "AAA"
+    {Propositions
+      "The 1",
+      "The 2",
+      "The 3",
+      "The 4"
+    }
+    Answers = 1, 3
+  ],
+  [CSV
+    "BBB";"0,2";"The A";"The B";"The C";"The D"
+  ],
+  [
+    InvalidInput = "This is very invalid"
+  ],
+  {
+    "InvalidInputAgain", "ThisIsVeryInvalid"
+  },
+  [
+    Answers = "Question will be missing"
+  ],
+  [
+    Question = "CCC"
+    IfFullCorrect=1
+    IfIncomplete=0
+    IfWrong=-1
+    Mandatory = true
+    {Propositions
+      "The X",
+      "The Y",
+      "The Z"
+    }
+    Answers = 0
+  ]
+}
+

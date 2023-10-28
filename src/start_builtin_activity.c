@@ -46,6 +46,8 @@ t_technocore_result		start_builtin_activity(const char		*argv0,
     return (evaluate_construction(argv0, general_cnf, exe, act));
   if (strcmp(module, "Command") == 0)
     return (execute_command(argv0, general_cnf, exe, act));
+  if (strcmp(module, "Norm") == 0)
+    return (evaluate_file_c_norm(argv0, general_cnf, exe, act));
 
   return (critical(argv0, "Invalid Module specified for exercise", exe));
 }

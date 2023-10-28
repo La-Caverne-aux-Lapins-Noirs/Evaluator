@@ -95,6 +95,14 @@ int			tcpopen(const char				*module_name,
 				char					*message,
 				size_t					msg_size);
 
+bool			retrieve_all_files(char				*path,
+					   size_t			maxpath,
+					   char				**files,
+					   size_t			*browse,
+					   size_t			cells,
+					   size_t			cellsize,
+					   const char			*ext);
+
 typedef t_technocore_result t_builtin_module(const char			*argv,
 					     t_bunny_configuration	*general_cnf,
 					     t_bunny_configuration	*local_cnf,
@@ -106,6 +114,7 @@ t_builtin_module	evaluate_mcq;
 t_builtin_module	evaluate_style;
 t_builtin_module	execute_command;
 t_builtin_module	evaluate_cheat;
+t_builtin_module	evaluate_file_c_norm;
 
 // Sous fonction de evaluate_construction
 t_builtin_module	evaluate_make_build;

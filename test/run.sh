@@ -4,7 +4,7 @@ success_test=0
 total_test=0
 
 flags="-O0 -Og -g -g3 -ggdb -W -Wall -std=c11 -fprofile-arcs -ftest-coverage --coverage -rdynamic"
-libs="-L${HOME}/.froot/lib/ -I${HOME}/.froot/include/ -L../ -I../include/ --whole-file -levaluator -llapin -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system -lavcall -lopencv_imgproc -lopencv_highgui -lopencv_objdetect -lopencv_video -lopencv_core -ldl -lm -lusb -lgcov -lstdc++"
+libs="-L${HOME}/.froot/lib/ -I${HOME}/.froot/include/ -L../ -I../include/ --whole-file -levaluator -llapin -lcrawler -lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system -lavcall -lopencv_imgproc -lopencv_highgui -lopencv_objdetect -lopencv_video -lopencv_core -ldl -lm -lusb -lgcov -lstdc++"
 
 run_test()
 {
