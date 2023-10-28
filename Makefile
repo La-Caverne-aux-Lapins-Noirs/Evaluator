@@ -14,6 +14,7 @@
 
   NAME		=	evaluator
   TESTLIB	=	libevaluator.so
+  RELEASE	=	1
 
 #################################################################################
 ## Building details                                                            ##

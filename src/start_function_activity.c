@@ -23,8 +23,9 @@ static t_technocore_result	prepare_jump(const char				*argv0,
   int				err;
 
   del = 2;
-  if (bunny_configuration_getf(exe_cnf, &del, "Timeout") == false)
-    bunny_configuration_getf(general_cnf, &del, "Timeout"); // LCOV_EXCL_LINE
+  bunny_configuration_getf(general_cnf, &del, "Timeout");
+  bunny_configuration_getf(exe_cnf, &del, "Timeout");
+
   alarm(abs(del));
   if ((err = setjmp(gl_before_test)) == 0)
     res = tech_func(user_handler, general_cnf, exe_cnf, act);
@@ -164,4 +165,3 @@ t_technocore_result		start_function_activity(const char		*argv0,
   delete_function(user);
   return (res);
 }
-
