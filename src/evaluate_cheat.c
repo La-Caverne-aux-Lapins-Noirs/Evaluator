@@ -90,7 +90,7 @@ t_technocore_result	evaluate_cheat(const char			*argv,
 
   if (tcpopen("cheat", "gcc -shared -o libcheat.so -fPIC `find . -name '*.o'`", &buffer[0], &siz, NULL, 0) != 0)
     { // LCOV_EXCL_START
-      add_message(&gl_technocore.error_buffer, "Cannot list object for the cheating module.\n");
+      add_message(&gl_technocore.error_buffer, "Cannot list object for the cheating module %s.\n", bunny_configuration_get_address(exe));
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
   const char		*tokens[4] = {"\r", "\n", " ", NULL};

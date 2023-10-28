@@ -19,9 +19,14 @@ t_technocore_result	execute_command(const char			*argv,
   (void)general_cnf;
   (void)act;
   if (bunny_configuration_getf(exe, &cnf, "Command") == false)
-    // Ce module sert à la correction quand elle a besoin d'effectuer une tache.
-    // Si Command n'est pas la, c'est qu'il y a une erreur!
-    return (TC_CRITICAL);
+    { // LCOV_EXCL_START
+      // Ce module sert à la correction quand elle a besoin d'effectuer une tache.
+      // Si Command n'est pas la, c'est qu'il y a une erreur!
+      add_message(&gl_technocore.error_buffer,
+		  "Missing command field for builtin command.\n"
+		  );
+      return (TC_CRITICAL);
+    } // LCOV_EXCL_STOP
   if (bunny_configuration_getf(cnf, &cmd, ".") == false)
     for (int i = 0; bunny_configuration_getf(cnf, &cmd, "[%d]", i); ++i)
       {
