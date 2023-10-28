@@ -17,11 +17,13 @@
 int				__stdin;
 int				__stdout;
 
+// LCOV_EXCL_START
 static void			siguser1(int					x)
 {
   close(__stdin);
   exit(x);
 }
+// LCOV_EXCL_STOP
 
 static void			siguser2(int					x)
 {
