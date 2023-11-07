@@ -15,6 +15,7 @@
   NAME		=	evaluator
   TESTLIB	=	libevaluator.so
   LIBBIN	=	libevaluator.a
+  RELEASE	=	1
 
 #################################################################################
 ## Building details                                                            ##
@@ -112,6 +113,7 @@ check:			$(TESTLIB)
 
 install:		$(LIBBIN) $(NAME) check
 			@$(CP) $(NAME) $(BIN_DIR)
+			@$(CP) $(TESTLIB) $(LIB_DIR)
 			@$(CP) $(CNF) $(ETC_DIR)
 			@$(CP) $(INC) $(INC_DIR)
 			@$(CP) $(LIBBIN) $(LIB_DIR)
