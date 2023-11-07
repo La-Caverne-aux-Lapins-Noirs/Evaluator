@@ -14,6 +14,7 @@
 
   NAME		=	evaluator
   TESTLIB	=	libevaluator.so
+  LIBBIN	=	libevaluator.a
 
 #################################################################################
 ## Building details                                                            ##
@@ -22,11 +23,11 @@
   COMPILER	?=	gcc
   LINKER	?=	gcc -o
   TESTLINKER	?=	gcc -shared -fprofile-arcs $(LIB) -o
-#  TESTLINKER	?=	ar rcs
+  LIBLINKER	?=	ar rcs
 
-  BIN_DIR	?=	/usr/bin/
-  LIB_DIR	?=	/usr/lib/
-  INC_DIR	?=	/usr/include/
+  BIN_DIR	?=	/usr/local/bin/
+  LIB_DIR	?=	/usr/local/lib/
+  INC_DIR	?=	/usr/local/include/
   ETC_DIR	?=	/etc/technocore/
   LIB_TESTDIR	?=	$(HOME)/.froot/lib/
 
@@ -79,7 +80,7 @@
 #################################################################################
 
 all:			build check
-build:			rmlog $(NAME)
+build:			rmlog $(NAME) $(LIBBIN)
 $(NAME):		$(OBJ)
 			@$(LINKER) $(NAME) $(OBJ) $(LIB) $(ERRLOG) &&		\
 			 $(ECHO) $(TEAL) "[OK]" $(GREEN) $(NAME) $(DEFLT) ||	\
@@ -90,6 +91,11 @@ $(TESTLIB):		$(OBJ)
 			 $(ECHO) $(TEAL) "[OK]" $(GREEN) $(TESTLIB) $(DEFLT) || \
 			 $(ECHO) $(RED)  "[KO]" $(TESTLIB) $(DEFLT)
 			@$(CP) $(TESTLIB) $(LIB_TESTDIR)
+			@echo $(MODE_NAME)
+$(LIBBIN):		$(OBJ)
+			@$(LIBLINKER) $(LIBBIN) $(LIBOBJ) $(ERRLOG) &&	\
+			 $(ECHO) $(TEAL) "[OK]" $(GREEN) $(LIBBIN) $(DEFLT) || \
+			 $(ECHO) $(RED)  "[KO]" $(LIBBIN) $(DEFLT)
 			@echo $(MODE_NAME)
 .c.o:
 			@$(COMPILER) -c $< -o $@ $(PROFILE) $(CONFIG)		\
@@ -104,10 +110,11 @@ $(TESTLIB):		$(OBJ)
 check:			$(TESTLIB)
 			@(cd test/ && $(MAKE) --no-print-directory)
 
-install:
+install:		$(LIBBIN) $(NAME) check
 			@$(CP) $(NAME) $(BIN_DIR)
 			@$(CP) $(CNF) $(ETC_DIR)
 			@$(CP) $(INC) $(INC_DIR)
+			@$(CP) $(LIBBIN) $(LIB_DIR)
 rmlog:
 			@$(RM) $(LOGFILE)
 clean:
