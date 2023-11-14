@@ -50,6 +50,17 @@ t_technocore_result		start_builtin_activity(const char		*argv0,
     return (execute_move(argv0, general_cnf, exe, act));
   if (strcmp(module, "Norm") == 0)
     return (evaluate_file_c_norm(argv0, general_cnf, exe, act));
+  if (strcmp(module, "Unset") == 0)
+    {
+      t_bunny_configuration	*vcnf;
+
+      if (!bunny_configuration_getf(exe, NULL, "Variables"))
+	bunny_delete_node(general_cnf, "Variables");
+      if (bunny_configuration_getf(general_cnf, &vcnf, "Variables"))
+	for (int v = 0; bunny_configuration_getf(exe, &module, "Variables[%d]", v); ++v)
+	  bunny_delete_node(vcnf, module);
+      return (TC_SUCCESS);
+    }
 
   return (critical(argv0, "Invalid Module specified for exercise", exe));
 }

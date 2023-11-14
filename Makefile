@@ -15,7 +15,7 @@
   NAME		=	evaluator
   TESTLIB	=	libevaluator.so
   LIBBIN	=	libevaluator.a
-  RELEASE	=	0
+  RELEASE	=	1
 
 #################################################################################
 ## Building details                                                            ##

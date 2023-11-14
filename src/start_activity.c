@@ -65,7 +65,7 @@ t_technocore_result	start_activity(const char			*argv0,
 	      fprintf(stderr, "%s: Invalid ConditionalVar field %s.\n", argv0, str);
 	      return (TC_CRITICAL);
 	    }
-	  if (!bunny_configuration_getf(act, &cond, "%s", str) || !cond)
+	  if (!bunny_configuration_getf(act, &cond, "Variables.%s", str) || !cond)
 	    continue ;
 	}
       
@@ -75,15 +75,18 @@ t_technocore_result	start_activity(const char			*argv0,
 	  snprintf(&buffer[0], sizeof(buffer), dict_get_pattern("Exercise"), i);
 	  str = &buffer[0];
 	} // LCOV_EXCL_STOP
-      if (bunny_configuration_setf(tech.report, str, "Exercises[%d].Name", i) == false)
-	{ // LCOV_EXCL_START
-	  fprintf(stderr, "%s: Cannot create report node for activity %s.\n", argv0, str);
-	  goto DeleteTA;
-	} // LCOV_EXCL_STOP
+
       if (!bunny_configuration_getf(act, NULL, "NoReport"))
 	{
-	  excnt += 1;
+	  // On écrit le nom afin de générer le noeud
+	  if (bunny_configuration_setf(tech.report, str, "Exercises[%d].Name", excnt) == false)
+	    { // LCOV_EXCL_START
+	      fprintf(stderr, "%s: Cannot create report node for activity %s.\n", argv0, str);
+	      goto DeleteTA;
+	    } // LCOV_EXCL_STOP
+	  // On récupère le noeud
 	  bunny_configuration_getf(tech.report, &tech.current_report, "Exercises[%d]", excnt);
+	  excnt += 1;
 	}
       else
 	tech.current_report = NULL;
@@ -140,7 +143,7 @@ t_technocore_result	start_activity(const char			*argv0,
 	      fprintf(stderr, "%s: Invalid SetVar field %s.\n", argv0, str);
 	      return (TC_CRITICAL);
 	    }
-	  bunny_configuration_setf(act, 1, "%s", str);
+	  bunny_configuration_setf(act, 1, "Variables.%s", str);
 	}
     }
 
