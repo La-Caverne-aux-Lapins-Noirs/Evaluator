@@ -407,6 +407,22 @@ t_technocore_result		build_function_report(t_technocore_activity	*act,
 
   if (res1 == TC_FAILURE || res2 == TC_FAILURE)
     return (TC_FAILURE);
+
+  // Tout est réussi, alors on va pouvoir débloquer les fonctions
+  // On les ajoute bien sur dans le rapport, mais aussi
+  // dans la liste des fonctions autorisées, au cas ou les prochains exercices
+  // s'en servent aussi.
+  const char			*str;
+  int				cnt;
+
+  for (cnt = 0; bunny_configuration_getf(exe, &str, "UnlockedFunctions[%d]", cnt); ++cnt)
+    if (add_exercise_function(act, exe, str) == false)
+      { // LCOV_EXCL_START
+	add_message
+	  (&gl_technocore.error_buffer, "Cannot add functio %s to the list of authorized ones.\n",
+	   str);
+	return (TC_CRITICAL);
+      } // LCOV_EXCL_STOP
   return (TC_SUCCESS);
 }
 

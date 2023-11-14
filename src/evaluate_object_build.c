@@ -35,10 +35,15 @@ t_technocore_result	evaluate_object_build(const char		*argv,
       if (bol)
 	build_cmd = "gcc %s -o %1$s.out -I./ -I./include/ -I/usr/local/include/";
       else
-	build_cmd = "gcc -L/usr/local/lib/ -c %s -I./ -I./include -I/usr/local/include/";
+	build_cmd = "gcc -L/usr/local/lib/ -c %s -o %1$s -I./ -I./include -I/usr/local/include/";
     }
   // On redirige les erreurs vers la sortie standard
   snprintf(&build_command[0], sizeof(build_command), "%s 2>&1", build_cmd);
+
+  ///////////////////////////////////////////////////////////////////
+  // Vérifier qu'il n'y a que deux éléments de pattern %s et %1$s. //
+  ///////////////////////////////////////////////////////////////////
+  
   char			tmp[2048];
   char			*buffer;
   FILE			*search_pipe;
@@ -85,10 +90,15 @@ t_technocore_result	evaluate_object_build(const char		*argv,
       for (size_t x = 0; splitted[x]; ++x)
 	{
 	  FILE		*build_pipe;
+	  char		*outopt;
 	  size_t	red;
 	  int		ret;
 
 	  snprintf(&tmp[0], sizeof(tmp), build_command, splitted[x]);
+	  if ((outopt = strstr(&tmp[0], " -o ")) != NULL)
+	    if ((outopt = strstr(outopt, ".c ")) != NULL)
+	      outopt[1] = 'o';
+	  
 	  if ((build_pipe = popen(&tmp[0], "r")) == NULL)
 	    { // LCOV_EXCL_START
 	      add_message(&gl_technocore.error_buffer,

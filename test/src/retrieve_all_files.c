@@ -21,10 +21,11 @@ int			main(void)
   if (chdir("./raf/") != 0)
     if (chdir("./res/raf/") != 0)
       if (chdir("./src/res/raf") != 0)
-	assert(chdir("./test/src/raf") == 0);
+	assert(chdir("./test/src/res/raf") == 0);
 
   nbr = 0;
-  strcpy(path, ".");
+  path[0] = '.';
+  path[1] = '\0';
   assert(retrieve_all_files(path, NBRCELL(path), buffer, &nbr, 16, 64, ".x"));
   assert(nbr == 7);
   fnd = 0;

@@ -13,10 +13,10 @@
 #ifdef			NDEBUG
 
 # ifndef		TECHNOCORE_CONFIGURATION
-#  define		TECHNOCORE_CONFIGURATION			"/etc/technocore/configuration.dab"
+#  define		TECHNOCORE_CONFIGURATION			"/opt/technocore/configuration.dab"
 # endif
 # ifndef		TECHNOCORE_DICTIONNARY
-#  define		TECHNOCORE_DICTIONNARY				"/etc/technocore/dictionnary.dab"
+#  define		TECHNOCORE_DICTIONNARY				"/opt/technocore/dictionnary.dab"
 # endif
 
 #else
@@ -113,6 +113,7 @@ t_builtin_module	evaluate_construction;
 t_builtin_module	evaluate_mcq;
 t_builtin_module	evaluate_style;
 t_builtin_module	execute_command;
+t_builtin_module	execute_move;
 t_builtin_module	evaluate_cheat;
 t_builtin_module	evaluate_file_c_norm;
 

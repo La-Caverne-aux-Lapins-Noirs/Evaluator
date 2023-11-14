@@ -14,7 +14,7 @@
 // Le type de la fonction élève
 typedef int		(*t_func)(int				a);
 // Le type de la fonction de test élève
-typedef bool		(*t_test_func)(void);
+typedef int		(*t_test_func)(void);
 
 int			gl_signal;
 

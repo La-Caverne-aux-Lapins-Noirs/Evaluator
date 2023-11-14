@@ -9,10 +9,11 @@ Utilisation du logiciel
  Il attend optionnellement un fichier authorized.dab contenant les fonctions autorités pour l'évaluation.
 
  Le TechnoCentre néccessite, si il est en debug, la présence d'un fichier dictionnary.dab situé dans
- le même dossier que lui. Si il est en prod, le fichier doit être /etc/technocore/dictionnary.dab
+ le même dossier que lui. Si il est en prod, le fichier doit être /opt/technocore/dictionnary.dab
+ Un fichier .dab incluant /opt/technocore/dictionnaries.d est préféré.
 
  Le TechnoCentre néccessite, si il est en debug, la présence d'un fichier configuration.dab situé dans
- le même dossier que lui. Si il est en prod, le fichier doit être /etc/technocore/configuration.dab
+ le même dossier que lui. Si il est en prod, le fichier doit être /opt/technocore/configuration.dab
 
 Organisation générale d'un fichier de description d'activité
 ============================================================

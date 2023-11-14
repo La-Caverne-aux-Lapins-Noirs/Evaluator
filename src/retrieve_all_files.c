@@ -21,11 +21,12 @@ bool			retrieve_all_files(char			*path,
 					   const char		*ext)
 {
   char			*basepath;
-  int			curlen;
+  size_t		curlen;
   DIR			*dir;
   struct dirent		*dirent;
 
-  basepath = &path[curlen = strlen(path)];
+  for (curlen = 0; path[curlen] != '\0'; curlen++);
+  basepath = &path[curlen];
   if ((dir = opendir(path)) == false)
     return (false);
   while ((dirent = readdir(dir)))

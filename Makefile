@@ -15,7 +15,7 @@
   NAME		=	evaluator
   TESTLIB	=	libevaluator.so
   LIBBIN	=	libevaluator.a
-  RELEASE	=	1
+  RELEASE	=	0
 
 #################################################################################
 ## Building details                                                            ##
@@ -29,7 +29,7 @@
   BIN_DIR	?=	/usr/local/bin/
   LIB_DIR	?=	/usr/local/lib/
   INC_DIR	?=	/usr/local/include/
-  ETC_DIR	?=	/etc/technocore/
+  ETC_DIR	?=	/opt/technocore/
   LIB_TESTDIR	?=	$(HOME)/.froot/lib/
 
   LIB		=	-L$(HOME)/.froot/lib/ -llapin -lcrawler -lsfml-graphics \
@@ -41,11 +41,15 @@
   DEBUG		=	-O0 -Og -g -g3 -ggdb -fprofile-arcs -ftest-coverage	\
 			--coverage -fno-omit-frame-pointer -fno-align-functions	\
 			-fno-align-loops
-  PRODUCTION	=	-O3 -ffast-math -march=native -DNDEBUG
+  TEST		=	$(DEBUG) -DNDEBUG
+  PRODUCTION	=	-O3 -ffast-math -march=native
 
-  ifeq ($(RELEASE), 1)
+  ifeq ($(RELEASE), 2)
     MODE_NAME	=	"Build mode: release"
-    PROFILE	=	$(PRODUCTION)
+    PROFILE	=	$(DEBUG)
+  else ifeq ($(RELEASE), 1)
+    MODE_NAME	=	"Build mode: test"
+    PROFILE	=	$(TEST)
   else
     MODE_NAME	=	"Build mode: debug"
     PROFILE	=	$(DEBUG)
@@ -56,6 +60,7 @@
   ECHO		=	/bin/echo -e
   LOGFILE	=	errors~
   ERRLOG	=	2>> $(LOGFILE)
+  MKDIR		=	mkdir -p
 
   HEADER	=	-I./include/
 
@@ -91,7 +96,6 @@ $(TESTLIB):		$(OBJ)
 			@$(TESTLINKER) $(TESTLIB) $(LIBOBJ) $(ERRLOG) &&	\
 			 $(ECHO) $(TEAL) "[OK]" $(GREEN) $(TESTLIB) $(DEFLT) || \
 			 $(ECHO) $(RED)  "[KO]" $(TESTLIB) $(DEFLT)
-			@$(CP) $(TESTLIB) $(LIB_TESTDIR)
 			@echo $(MODE_NAME)
 $(LIBBIN):		$(OBJ)
 			@$(LIBLINKER) $(LIBBIN) $(LIBOBJ) $(ERRLOG) &&	\
@@ -112,8 +116,8 @@ check:			$(TESTLIB)
 			@(cd test/ && $(MAKE) --no-print-directory)
 
 install:		$(LIBBIN) $(NAME) check
+			@$(MKDIR) $(BIN_DIR) $(LIB_DIR) $(ETC_DIR) $(INC_DIR)
 			@$(CP) $(NAME) $(BIN_DIR)
-			@$(CP) $(TESTLIB) $(LIB_DIR)
 			@$(CP) $(CNF) $(ETC_DIR)
 			@$(CP) $(INC) $(INC_DIR)
 			@$(CP) $(LIBBIN) $(LIB_DIR)
@@ -130,6 +134,7 @@ fclean:			clean
 				-or -name "*.a" -delete				\
 				-or -name "*.o" -delete				\
 				-or -name "*~" -delete
+			@$(RM) $(LIB_DIR)/$(LIBBIN)
 			@$(RM) $(NAME) &&					\
 			 $(ECHO) $(GREEN) "Program deleted!" $(DEFLT) ||	\
 			 $(ECHO) $(RED) "Error in fclean rule!" $(DEFLT)

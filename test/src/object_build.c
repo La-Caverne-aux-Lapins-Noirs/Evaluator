@@ -60,7 +60,10 @@ int			main(void)
   assert(bunny_configuration_setf(local, 1, "Tolerance"));
   assert(bunny_configuration_setf(local, "echo ./warning.c", "SearchCommand"));
   // Contient un fichier .c qui sera compilé en .o
-  assert(chdir("./src/res/object_build/") == 0);
+  if (chdir("./test/src/res/object_build") != 0)
+    if (chdir("./src/res/object_build") != 0)
+      if (chdir("res/object_build") != 0)
+	assert(chdir("object_build") == 0);
   assert(evaluate_object_build("a", local, local, &act) == TC_SUCCESS);
 
   assert(bunny_configuration_getf(act.current_report, &str, "Conclusion"));

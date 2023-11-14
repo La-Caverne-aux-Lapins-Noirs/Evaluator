@@ -13,6 +13,8 @@ bool			add_to_current_report(t_technocore_activity	*act,
 					      const char		*pattern,
 					      ...)
 {
+  if (!act->current_report)
+    return (true);
   va_list		lst;
   char			buffer[2048];
 

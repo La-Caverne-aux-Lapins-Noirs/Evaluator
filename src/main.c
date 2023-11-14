@@ -23,7 +23,7 @@ int			main(int		argc,
     }
 
   // Ouverture du dictionnaire
-  bunny_set_log_filter("syntax,configuration");
+  bunny_set_log_filter("syntax");
   if (dict_open() == false)
     {
       fprintf(stderr, "%s: Impossible to open dictionnary file.\n", argv[0]);
@@ -48,6 +48,14 @@ int			main(int		argc,
       fprintf(stderr, "%s: Cannot get current working directory. %s.\n", *argv, strerror(errno));
       return (EXIT_FAILURE);
     }
+
+  // On place une racine universelle pour l'ensemble des configurations chargées
+  char			tmp[1024];
+
+  strncpy(&tmp[0], TECHNOCORE_CONFIGURATION, sizeof(tmp));
+  *strrchr(&tmp[0], '/') = '\0';
+  bunny_configuration_push_path(tmp);
+  
   t_bunny_configuration	*cnf;
 
   // On se deplace dans chaque dossier courant et on passe a l'etape suivante pour chacun d'entre eux

@@ -52,7 +52,7 @@
 ## Rules                                                                       ##
 #################################################################################
 
-all:			rmlog $(REPORT)
+all:			$(REPORT)
 $(OBJ):
 			@$(COMPILER) $@.c -o $@ $(FLAGS)			\
 			 $(HEADER) $(LIB) $(ERRLOG)

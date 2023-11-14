@@ -26,7 +26,10 @@ int			main(void)
   assert(bunny_configuration_setf(cnf, true, "CheckTests"));
   assert(bunny_configuration_setf(cnf, true, "CheckInstall"));
   assert(act.current_report = bunny_new_configuration());
-  assert(chdir("./src/res/make/") == 0);
+  if (chdir("./test/src/res/make") != 0)
+    if (chdir("./src/res/make") != 0)
+      if (chdir("./res/make") != 0)
+	assert(chdir("./make/") == 0);
 
   /////////////////////////////////////////////
   // Etape 1: Le Makefile n'existe pas.
