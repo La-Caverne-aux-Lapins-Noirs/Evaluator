@@ -45,6 +45,7 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
       if ((code = load_c_file(files[j], exe, false)) == NULL)
 	return (TC_CRITICAL);
       i = 0;
+      reset_norm_status(&p);
       read_translation_unit(&p, files[j], code, &i, false);
     }
 
