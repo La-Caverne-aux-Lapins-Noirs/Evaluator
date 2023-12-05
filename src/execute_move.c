@@ -13,8 +13,6 @@ t_technocore_result	execute_move(const char				*argv,
 				     t_bunny_configuration		*exe,
 				     t_technocore_activity		*act)
 {
-  char			buffer[1024];
-  t_bunny_configuration	*cnf;
   const char		*cmd;
 
   (void)argv;

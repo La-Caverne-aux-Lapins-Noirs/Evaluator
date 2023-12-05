@@ -23,11 +23,11 @@ int			function_to_evaluate(int		x)
   return (x);
 }
 
-bool			test_function_to_evaluate(void)
+int			test_function_to_evaluate(void)
 {
   if (function_to_evaluate(42) != 42)
-    return (false); // LCOV_EXCL_LINE
-  return (true);
+    return (1); // LCOV_EXCL_LINE
+  return (0);
 }
 
 t_technocore_result	test_function(void			*user_handler,
@@ -45,7 +45,7 @@ t_technocore_result	test_function(void			*user_handler,
   test = (t_test_func)fem.user_functions.test;
   assert(func == function_to_evaluate);
   assert(test == test_function_to_evaluate);
-  assert(test_function_to_evaluate());
+  assert(test_function_to_evaluate() == 0);
   if (gl_signal > 0)
     {
       if (gl_signal == SIGALRM)
@@ -66,7 +66,7 @@ int			main(void)
     "[Local\n"
     "  Evaluator = \"test_function\"\n"
     "  FunctionName = \"function_to_evaluate\"\n"
-    "  TestName = \"test_function_to_evaluate\"\n"
+    "  TestFunctionName = \"test_function_to_evaluate\"\n"
     "  Timeout = 1\n"
     "]\n"
     ;

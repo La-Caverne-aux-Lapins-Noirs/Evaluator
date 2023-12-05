@@ -73,7 +73,10 @@ int			main(void)
 
   // Ca marche.
   assert(bunny_configuration_setf(cnf, "gcc ok.c", "BuildCommand"));
-  assert(chdir("./src/res/object_build") == 0);
+  if (chdir("./test/src/res/object_build") != 0)
+    if (chdir("./src/res/object_build") != 0)
+      if (chdir("./res/object_build") != 0)
+	assert(chdir("./object_build") == 0);
   assert(evaluate_full_build("a", cnf, cnf, &act) == TC_SUCCESS);
   assert(!bunny_configuration_getf(act.current_report, NULL, "Message"));
   assert(!bunny_configuration_getf(act.current_report, NULL, "Status"));

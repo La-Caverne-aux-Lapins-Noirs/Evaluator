@@ -58,7 +58,7 @@ int			main(void)
   assert(eval.fully_working == false);
   assert(eval.defensive_programming == true);
   assert(eval.signal_error == false);
-  assert(eval.use_errno == true);
+  assert(eval.use_errno == false);
   assert(fabs(eval.perf_ratio - 2.0) < 0.1);
   assert(fabs(eval.ram_ratio - 3.0) < 0.1);
   assert(eval.test_func == true);
@@ -66,7 +66,7 @@ int			main(void)
   assert(eval.fully_testing == false);
   assert(eval.defensive_testing == true);
   assert(eval.error_testing == false);
-  assert(eval.errno_testing == true);
+  assert(eval.errno_testing == false);
   assert(eval.cheater == false);
   assert(eval.missing_main_function == false);
   assert(eval.missing_test_function == false);
@@ -96,7 +96,7 @@ int			main(void)
   assert(eval.fully_working == false);
   assert(eval.defensive_programming == true);
   assert(eval.signal_error == false);
-  assert(eval.use_errno == true);
+  assert(eval.use_errno == false);
   assert(fabs(eval.perf_ratio - 2.0) < 0.1);
   assert(fabs(eval.ram_ratio - 3.0) < 0.1);
   assert(eval.test_func == true);
@@ -104,7 +104,7 @@ int			main(void)
   assert(eval.fully_testing == false);
   assert(eval.defensive_testing == true);
   assert(eval.error_testing == false);
-  assert(eval.errno_testing == true);
+  assert(eval.errno_testing == false);
   assert(eval.cheater == false);
   assert(eval.missing_main_function == false);
   assert(eval.missing_test_function == false);

@@ -181,8 +181,8 @@ static t_technocore_result	build_func_report(t_technocore_activity		*act,
 	{
 	  if (add_exercise_message(act, dict_get_pattern("BadPerformences"),
 				   fem->user_functions.func_name,
-				   (int)res->perf_ratio * 100,
-				   (int)crit->perf_ratio * 100) == false)
+				   (int)(res->perf_ratio * 100),
+				   (int)(crit->perf_ratio * 100)) == false)
 	    { // LCOV_EXCL_START
 	      add_message
 		(&gl_technocore.error_buffer, "Cannot write function report for slow function %s.\n",
@@ -197,8 +197,23 @@ static t_technocore_result	build_func_report(t_technocore_activity		*act,
 	      success = false;
 	    }
 	}
-      else if (add_medal(act, exe, "MaximumPerfRatioMedals") == false)
-	return (TC_CRITICAL);
+      else
+	{
+	  if (add_exercise_message
+	      (act, dict_get_pattern("YourPerformencesAre"),
+	       fem->user_functions.func_name,
+	       (int)(res->perf_ratio * 100),
+	       (int)(crit->perf_ratio * 100)
+	       ) == false)
+	    { // LCOV_EXCL_START
+	      add_message
+		(&gl_technocore.error_buffer, "Cannot write function performence report for function %s.\n",
+		 fem->user_functions.func_name);
+	      return (TC_CRITICAL);
+	    } // LCOV_EXCL_STOP
+	  if (add_medal(act, exe, "MaximumPerfRatioMedals") == false)
+	    return (TC_CRITICAL);
+	}
     }
 
   if (crit->ram_ratio > 0)
@@ -207,8 +222,8 @@ static t_technocore_result	build_func_report(t_technocore_activity		*act,
 	{
 	  if (add_exercise_message(act, dict_get_pattern("TooGreedy"),
 				   fem->user_functions.func_name,
-				   (int)res->ram_ratio * 100,
-				   (int)crit->ram_ratio * 100) == false)
+				   (int)(res->ram_ratio * 100),
+				   (int)(crit->ram_ratio * 100)) == false)
 	    { // LCOV_EXCL_START
 	      add_message
 		(&gl_technocore.error_buffer, "Cannot write function report for greedy function %s.\n",
@@ -223,8 +238,23 @@ static t_technocore_result	build_func_report(t_technocore_activity		*act,
 	      success = false;
 	    }
 	}
-      else if (add_medal(act, exe, "MaximumRamRatioMedals") == false)
-	return (TC_CRITICAL);
+      else
+	{
+	  if (add_exercise_message
+	      (act, dict_get_pattern("YourRamIs"),
+	       fem->user_functions.func_name,
+	       (int)(res->ram_ratio * 100),
+	       (int)(crit->ram_ratio * 100)
+	       ) == false)
+	    { // LCOV_EXCL_START
+	      add_message
+		(&gl_technocore.error_buffer, "Cannot write function ram report for function %s.\n",
+		 fem->user_functions.func_name);
+	      return (TC_CRITICAL);
+	    } // LCOV_EXCL_STOP
+	  if (add_medal(act, exe, "MaximumRamRatioMedals") == false)
+	    return (TC_CRITICAL);
+	}
     }
 
   return (success ? TC_SUCCESS : TC_FAILURE);

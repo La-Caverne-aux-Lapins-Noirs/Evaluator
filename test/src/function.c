@@ -34,7 +34,7 @@ int			main(void)
     "[Local\n"
     "  UserLibrary = \"local\"\n"
     "  FunctionName = \"test_function_name\"\n"
-    "  TestName = \"test_test_name\"\n"
+    "  TestFunctionName = \"test_test_name\"\n"
     "]\n"
     ;
 
@@ -65,7 +65,7 @@ int			main(void)
 
   // Si rien n'est bien rendu
   assert(bunny_configuration_setf(loc, "bad_function_name", "FunctionName"));
-  assert(bunny_configuration_setf(loc, "bad_function_name", "TestName"));
+  assert(bunny_configuration_setf(loc, "bad_function_name", "TestFunctionName"));
   get_user_functions(f.handler, &eval_cnf, &eval, loc, &ufunc);
   assert(strcmp(ufunc.func_name, "bad_function_name") == 0);
   assert(strcmp(ufunc.test_name, "bad_function_name") == 0);

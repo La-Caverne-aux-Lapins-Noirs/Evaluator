@@ -34,6 +34,10 @@ typedef struct			s_technocore
   int				stdout_pipe[2];
   int				stderr_pipe[2];
 
+  int				stdin;
+  int				stdout;
+  int				stderr;
+
   t_message			error_buffer;
 }				t_technocore;
 extern t_technocore		gl_technocore;
@@ -197,55 +201,33 @@ void				evaluate_test_efficiency(t_trigger		*trigger,
 							 t_test_func		test,
 							 int			maxbkcase);
 
-# define			CAT(a, b)				\
+bool				dict_open(void);
+bool				dict_set_language(const char			*str);
+const char			*dict_get_pattern(const char			*str);
+t_technocore_result		no_output(t_technocore_activity			*act,
+					  int					fd,
+					  const char				*out,
+					  const char				*fil);
+t_technocore_result		module_fail(const char				*lab,
+					    const char				*fil);
+
+typedef void			(*t_perf_test)(void				*f,
+					       void				*b);
+void				evaluate_performances(t_func_eval_mod		*fem,
+						      t_perf_test		pcall,
+						      void			*tcf,
+						      void			*fun,
+						      void			*data,
+						      size_t			dsiz,
+						      size_t			nmb);
+
+# define			CAT(a, b)					\
   a ## b
-# define			TCRFUNC(name)				\
+# define			TCRFUNC(name)					\
   CAT(_technocore_, name)
-# define			TCFUNC(name)				\
+# define			TCFUNC(name)					\
   CAT(technocore_, name)
-# define			EVFUNC(name)				\
+# define			EVFUNC(name)					\
   CAT(evaluate_, name)
-# define			PERF_TEST(fem, tcfunc, func)		\
-  do									\
-    {									\
-      size_t			user_ram;				\
-      size_t			tc_ram;					\
-      size_t			ram_now;				\
-									\
-      t_bunny_time		user_perf;				\
-      t_bunny_time		tc_perf;				\
-      t_bunny_time		time_now;				\
-									\
-      time_now = bunny_get_time();					\
-      ram_now = get_allocated_byte_count();				\
-      for (i = 0; i < NBRCELL(bench); ++i)				\
-	tcfunc(UNPACK(bench[i]));					\
-      tc_perf = bunny_get_time() - time_now;				\
-      tc_ram = get_allocated_byte_count() - ram_now;			\
-									\
-      ram_now = get_allocated_byte_count();				\
-      time_now = bunny_get_time();					\
-      for (i = 0; i < NBRCELL(bench); ++i)				\
-	func(UNPACK(bench[i]));						\
-      user_perf = bunny_get_time() - time_now;				\
-      user_ram = get_allocated_byte_count() - ram_now;			\
-									\
-      if (fem.criterias.perf_ratio > 0)					\
-	fem.result.perf_ratio = user_perf / tc_perf;			\
-      else								\
-	fem.result.perf_ratio = -1;					\
-      if (fem.criterias.ram_ratio > 0)					\
-	{								\
-	  if (tc_ram != 0)						\
-	    fem.result.ram_ratio = user_ram / tc_ram;			\
-	  else if (user_ram != 0)					\
-	    fem.result.ram_ratio = -user_ram;				\
-	  else								\
-	    fem.result.ram_ratio = 1;					\
-	}								\
-      else								\
-	fem.result.ram_ratio = -1;					\
-    }									\
-  while (0)
 
 #endif	/*			__TECHNOCORE_API_H__				*/

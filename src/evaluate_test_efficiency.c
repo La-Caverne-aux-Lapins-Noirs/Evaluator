@@ -28,7 +28,7 @@ void			evaluate_test_efficiency(t_trigger		*trigger,
       for (bkcase = 0; bkcase < maxbkcase; ++bkcase)
 	{
 	  // Notre fonction est tout le temps cassée
-	  *trigger = TCFUNC_BROKEN;
+	  *trigger = TCFUNC_BROKEN + bkcase;
 	  ok = ok && test() != 0;
 	}
       
@@ -75,6 +75,19 @@ void			evaluate_test_efficiency(t_trigger		*trigger,
     }
 
   //////////////////////////////////////////////////////
+  // La fonction du TC doit echouer a renvoyer une erreur
+  if (fem->criterias.error_testing)
+    {
+      ok = true;
+      for (bkcase = 0; bkcase < maxbkcase; ++ bkcase)
+	{
+	  *trigger = TCFUNC_NO_ERROR_HANDLING;
+	  ok = ok && test() != 0;
+	}
+      fem->result.error_testing = ok;
+    }
+  
+  //////////////////////////////////////////////////////
   // La fonction du TC doit echouer a établir errno
   if (fem->criterias.errno_testing)
     {
@@ -86,18 +99,5 @@ void			evaluate_test_efficiency(t_trigger		*trigger,
 	  ok = ok && test() != 0;
 	}
       fem->result.errno_testing = ok;
-    }
-
-  //////////////////////////////////////////////////////
-  // La fonction du TC doit echouer a renvoyer une erreur
-  if (fem->criterias.error_testing)
-    {
-      ok = true;
-      for (bkcase = 0; bkcase < maxbkcase; ++ bkcase)
-	{
-	  *trigger = TCFUNC_NO_ERROR_HANDLING;
-	  ok = ok && test() != 0;
-	}
-      fem->result.error_testing = ok;
     }
 }

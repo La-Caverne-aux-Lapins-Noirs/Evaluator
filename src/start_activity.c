@@ -35,6 +35,7 @@ t_technocore_result	start_activity(const char			*argv0,
   char			buffer[64];
   t_technocore_activity	tech;
   t_bunny_configuration	*act;
+  t_bunny_configuration	*rot;
   t_technocore_result	res;
   const char		*str;
   int			failedcnt;
@@ -42,6 +43,7 @@ t_technocore_result	start_activity(const char			*argv0,
 
   failedcnt = 0;
   res = TC_CRITICAL;
+  rot = bunny_configuration_get_root(cnf);
   memset(&tech, 0, sizeof(tech));
   if ((tech.report = bunny_new_configuration()) == NULL)
     { // LCOV_EXCL_START
@@ -65,7 +67,7 @@ t_technocore_result	start_activity(const char			*argv0,
 	      fprintf(stderr, "%s: Invalid ConditionalVar field %s.\n", argv0, str);
 	      return (TC_CRITICAL);
 	    }
-	  if (!bunny_configuration_getf(act, &cond, "Variables.%s", str) || !cond)
+	  if (!bunny_configuration_getf(rot, &cond, "Variables.%s", str) || !cond)
 	    continue ;
 	}
       
@@ -115,6 +117,10 @@ t_technocore_result	start_activity(const char			*argv0,
       if (res == TC_CRITICAL)
 	goto DeleteTA;  // LCOV_EXCL_LINE
 
+      if (tech.current_report)
+	if (!bunny_configuration_getf(tech.current_report, NULL, "Status"))
+	  bunny_configuration_setf(tech.current_report, res == TC_FAILURE ? "Failure" : "Success", "Status");
+      
       // En cas d'erreur de l'élève, on regarde ce que dit la configuration
       if (res == TC_FAILURE)
 	{
@@ -143,7 +149,7 @@ t_technocore_result	start_activity(const char			*argv0,
 	      fprintf(stderr, "%s: Invalid SetVar field %s.\n", argv0, str);
 	      return (TC_CRITICAL);
 	    }
-	  bunny_configuration_setf(act, 1, "Variables.%s", str);
+	  bunny_configuration_setf(rot, 1, "Variables.%s", str);
 	}
     }
 

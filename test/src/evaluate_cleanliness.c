@@ -22,7 +22,9 @@ int			main(void)
   memset(&act, 0, sizeof(act));
   assert(act.current_report = bunny_new_configuration());
 
-  assert(chdir("./src/res/") == 0);
+  if (chdir("./test/src/res") != 0)
+    if (chdir("./src/res/") != 0)
+      assert(chdir("./res/") == 0);
   assert((cnf = bunny_open_configuration("./clean1.dab", NULL)));
   int			ret;
 

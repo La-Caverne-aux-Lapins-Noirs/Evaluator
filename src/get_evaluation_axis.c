@@ -53,6 +53,9 @@ void			get_evaluation_axis(t_bunny_configuration	*global_cnf,
   bunny_configuration_getf(global_cnf, &eval->use_errno, "UseErrno");
   bunny_configuration_getf(local_cnf, &eval->use_errno, "UseErrno");
 
+  if (eval->signal_error == false)
+    eval->use_errno = false;
+  
   bunny_configuration_getf(global_cnf, &eval->perf_ratio, "MaximumPerfRatio");
   bunny_configuration_getf(local_cnf, &eval->perf_ratio, "MaximumPerfRatio");
 
@@ -83,4 +86,7 @@ void			get_evaluation_axis(t_bunny_configuration	*global_cnf,
 
   bunny_configuration_getf(global_cnf, &eval->errno_testing, "ErrnoTesting");
   bunny_configuration_getf(local_cnf, &eval->errno_testing, "ErrnoTesting");
+
+  if (eval->error_testing == false)
+    eval->errno_testing = false;
 }

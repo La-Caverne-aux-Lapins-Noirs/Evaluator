@@ -64,10 +64,14 @@ t_technocore_result	evaluate_full_build(const char			*argv,
 	return (TC_CRITICAL);
     }
   t_technocore_result	res;
+  const char		*med;
 
   res = TC_SUCCESS;
   if (red == 0 && ret == 0) // Tout va bien
-    str = dict_get_pattern("ConstructionFullyAchieved");
+    {
+      str = dict_get_pattern("ConstructionFullyAchieved");
+      med = "full_build";
+    }
   else
     {
       bool		tolerance;
@@ -77,15 +81,20 @@ t_technocore_result	evaluate_full_build(const char			*argv,
       if (ret != 0) // Il y a des erreurs, c'est mort
 	{
 	  res = TC_FAILURE;
+	  med = "not_build";
 	  str = dict_get_pattern("ConstructionFailure");
-	} // LCOV_EXCL_START
+	}
       else if (tolerance) // Il y a des warnings mais on tolere
-	str = dict_get_pattern("ConstructionComplete");
+	{
+	  str = dict_get_pattern("ConstructionComplete");
+	  med = "warnings";
+	}
       else // Il y a des warnings et ce n'est pas permit
 	{
 	  res = TC_FAILURE;
+	  med = "too_many_warnings";
 	  str = dict_get_pattern("ConstructionStopped");
-	} // LCOV_EXCL_STOP
+	}
     }
 
   if (!add_to_current_report(act, str, "Conclusion"))
@@ -94,5 +103,12 @@ t_technocore_result	evaluate_full_build(const char			*argv,
 		  "Fail to write conclusion for full build module.\n");
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
+  if (!bunny_configuration_getf(exe, NULL, "NoMedals") &&
+      !add_exercise_medal(act, med))
+    { // LCOV_EXCL_START
+      add_message(&gl_technocore.error_buffer, "Cannot add full build medal.\n");
+      return (TC_CRITICAL);
+    } // LCOV_EXCL_STOP
+
   return (res);
 }

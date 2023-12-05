@@ -63,7 +63,28 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
 	  add_message(&gl_technocore.error_buffer, "Cannot add norm conclusion.\n");
 	  return (TC_CRITICAL);
 	} // LCOV_EXCL_STOP
+      if (!add_exercise_medal(act, "norm_rejected"))
+	{ // LCOV_EXCL_START
+	  add_message(&gl_technocore.error_buffer, "Cannot add norm medal.\n");
+	  return (TC_CRITICAL);
+	} // LCOV_EXCL_STOP
       return (TC_FAILURE);
+    }
+  if (p.nbr_error_points == 0)
+    {
+      if (!add_exercise_medal(act, "norm_perfect"))
+	{ // LCOV_EXCL_START
+	  add_message(&gl_technocore.error_buffer, "Cannot add norm medal.\n");
+	  return (TC_CRITICAL);
+	} // LCOV_EXCL_STOP
+    }
+  else if (p.nbr_error_points < p.maximum_error_points)
+    {
+      if (!add_exercise_medal(act, "norm_correct"))
+	{ // LCOV_EXCL_START
+	  add_message(&gl_technocore.error_buffer, "Cannot add norm medal.\n");
+	  return (TC_CRITICAL);
+	} // LCOV_EXCL_STOP
     }
 
   return (TC_SUCCESS);

@@ -5,9 +5,16 @@
 ** TechnoCore
 */
 
+#define				_GNU_SOURCE
+#include			<unistd.h>
+#include			<fcntl.h>
+
 #include			<signal.h>
 #include			<setjmp.h>
 #include			"technocore.h"
+
+#define				PAGT(label, a, ...)		\
+  do { fprintf(stderr, a, ##__VA_ARGS__); goto label; } while (0)
 
 jmp_buf				gl_before_test;
 
@@ -22,7 +29,7 @@ static t_technocore_result	prepare_jump(const char				*argv0,
   int				del;
   int				err;
 
-  del = 2;
+  del = 5;
   bunny_configuration_getf(general_cnf, &del, "Timeout");
   bunny_configuration_getf(exe_cnf, &del, "Timeout");
 
@@ -67,43 +74,71 @@ static t_technocore_result	prepare_io(const char				*argv0,
 					   t_bunny_configuration		*exe_cnf,
 					   t_technocore_activity		*act)
 {
-  t_technocore_result		res;
-  int				std_out;
-  int				std_err;
+  t_technocore_result		res = TC_CRITICAL;
+  int				std_in = -1;
+  int				std_out = -1;
+  int				std_err = -1;
 
   purge_message(&gl_technocore.error_buffer);
+
+  std_in = dup(STDIN_FILENO);
   std_out = dup(STDOUT_FILENO);
-  close(STDOUT_FILENO);
-  if (pipe(gl_technocore.stdout_pipe) == -1)
-    { // LCOV_EXCL_START
-      dup2(std_out, STDOUT_FILENO);
-      fprintf(stderr, "%s: Cannot create pipe for stdout. %s.\n", argv0, strerror(errno));
-      return (TC_CRITICAL);
-    } // LCOV_EXCL_STOP
-
   std_err = dup(STDERR_FILENO);
+  if (std_in == -1 || std_out == -1 || std_err == -1)
+    PAGT(CloseDups, "%s: Cannot duplicates i/o. %s.\n", argv0, strerror(errno));
+  gl_technocore.stdin_pipe[0] = gl_technocore.stdin_pipe[1] = -1;
+  gl_technocore.stdout_pipe[0] = gl_technocore.stdout_pipe[1] = -1;
+  gl_technocore.stderr_pipe[0] = gl_technocore.stderr_pipe[1] = -1;
+  if (pipe2(gl_technocore.stdin_pipe, O_NONBLOCK) == -1)
+    PAGT(ClosePipes, "%s: Cannot create pipe for stdin", argv0);
+  if (pipe2(gl_technocore.stdout_pipe, O_NONBLOCK) == -1)
+    PAGT(ClosePipes, "%s: Cannot create pipe for stdout", argv0);
+  if (pipe2(gl_technocore.stderr_pipe, O_NONBLOCK) == -1)
+    PAGT(ClosePipes, "%s: Cannot create pipe for stderr", argv0);
+  close(STDIN_FILENO);
+  close(STDOUT_FILENO);
   close(STDERR_FILENO);
-  if (pipe(gl_technocore.stderr_pipe) == -1)
-    { // LCOV_EXCL_START
-      dup2(std_out, STDOUT_FILENO);
-      dup2(std_err, STDERR_FILENO);
-      fprintf(stderr, "%s: Cannot create pipe for stderr. %s.\n", argv0, strerror(errno));
-      return (TC_CRITICAL);
-    } // LCOV_EXCL_STOP
-
+  gl_technocore.stdin = dup(gl_technocore.stdin_pipe[0]);
+  gl_technocore.stdout = dup(gl_technocore.stdout_pipe[1]);
+  gl_technocore.stderr = dup(gl_technocore.stderr_pipe[1]);
+  if (gl_technocore.stdin == -1 || gl_technocore.stdout == -1 || gl_technocore.stderr == -1)
+    goto ClosePlaceholders;
+  
   res = prepare_jump(argv0, user_handler, tech_func, general_cnf, exe_cnf, act);
 
-  close(gl_technocore.stdout_pipe[0]);
-  close(gl_technocore.stdout_pipe[1]);
-  close(gl_technocore.stderr_pipe[0]);
-  close(gl_technocore.stderr_pipe[1]);
-  dup2(std_out, STDOUT_FILENO);
-  dup2(std_err, STDERR_FILENO);
+ ClosePlaceholders:
+  close(gl_technocore.stdin); // 0
+  close(gl_technocore.stdout); // 1
+  close(gl_technocore.stderr); // 2
+  dup2(std_in, STDIN_FILENO); // On rend 0 a stdin
+  dup2(std_out, STDOUT_FILENO); // Etc.
+  dup2(std_err, STDERR_FILENO); // Etc.
+
   if (message_len(&gl_technocore.error_buffer) != 0)
     { // LCOV_EXCL_START
+      t_bunny_configuration *root = bunny_configuration_get_root(exe_cnf);
+      t_bunny_configuration *cnf = exe_cnf;
+      const char	*top = NULL;
+
+      while (!bunny_configuration_getf(cnf, &top, "Name") && cnf != root)
+	bunny_configuration_getf(cnf, &cnf, "..");
+      if (top)
+	fprintf(stderr, "%s: ", top);
       fprintf(stderr, "%s", get_message(&gl_technocore.error_buffer));
       purge_message(&gl_technocore.error_buffer);
     } // LCOV_EXCL_STOP
+
+ ClosePipes:
+  close(gl_technocore.stdin_pipe[0]);
+  close(gl_technocore.stdin_pipe[1]);
+  close(gl_technocore.stdin_pipe[0]);
+  close(gl_technocore.stdin_pipe[1]);
+  close(gl_technocore.stdin_pipe[0]);
+  close(gl_technocore.stdin_pipe[1]);
+ CloseDups:
+  close(std_in);
+  close(std_out);
+  close(std_err);
   return (res);
 }
 

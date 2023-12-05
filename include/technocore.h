@@ -103,6 +103,9 @@ bool			retrieve_all_files(char				*path,
 					   size_t			cellsize,
 					   const char			*ext);
 
+bool			add_all_medals(t_technocore_activity		*act,
+				       t_bunny_configuration		*exe);
+
 typedef t_technocore_result t_builtin_module(const char			*argv,
 					     t_bunny_configuration	*general_cnf,
 					     t_bunny_configuration	*local_cnf,

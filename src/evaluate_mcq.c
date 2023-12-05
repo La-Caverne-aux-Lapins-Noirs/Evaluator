@@ -198,10 +198,13 @@ t_technocore_result	evaluate_mcq(const char				*argv,
   if (score < minscore)
     aem = add_exercise_message(act, dict_get_pattern("MCQFailure"), score, minscore, maxscore);
   else
-    aem = add_exercise_message(act, dict_get_pattern("MCQSuccess"), score, minscore, maxscore);
+    {
+      aem = add_exercise_message(act, dict_get_pattern("MCQSuccess"), score, minscore, maxscore);
+      aem = add_all_medals(act, exe) && aem;
+    }
   if (aem == false)
     { // LCOV_EXCL_START
-      add_message(&gl_technocore.error_buffer, "Cannot add conclusion to MCQ module.");
+      add_message(&gl_technocore.error_buffer, "Cannot add conclusion or medal to MCQ module.");
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
 

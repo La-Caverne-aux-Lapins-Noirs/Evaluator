@@ -18,13 +18,21 @@ void			get_user_functions(void				*handler,
 
   // Y a t il une fonction a tester?
   if (eval_cnf->func)
-    if (bunny_configuration_getf(local_cnf, &ufunc->func_name, "FunctionName"))
-      if ((ufunc->func = dlsym(handler, ufunc->func_name)) == NULL)
-	eval->missing_main_function = true;
+    {
+      eval->missing_main_function = true;
+      if (!bunny_configuration_getf(local_cnf, &ufunc->func_name, "FunctionName"))
+	eval->missing_main_function = false;
+      else if ((ufunc->func = dlsym(handler, ufunc->func_name)) != NULL)
+	eval->missing_main_function = false;
+    }
 
   // Y a t il un test a tester?
   if (eval_cnf->test_func)
-    if (bunny_configuration_getf(local_cnf, &ufunc->test_name, "TestName"))
-      if ((ufunc->test = dlsym(handler, ufunc->test_name)) == NULL)
-	eval->missing_test_function = true;
+    {
+      eval->missing_test_function = true;
+      if (!bunny_configuration_getf(local_cnf, &ufunc->test_name, "TestFunctionName"))
+	eval->missing_test_function = false;
+      else if ((ufunc->test = dlsym(handler, ufunc->test_name)) != NULL)
+	eval->missing_test_function = false;
+    }
 }

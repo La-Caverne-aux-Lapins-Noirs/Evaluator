@@ -129,12 +129,14 @@ t_technocore_result	evaluate_cleanliness(const char			*argv,
   // On en tire les conclusions qu'on souhaite
   t_technocore_result	res;
   char			tmp[512];
+  const char		*medal;
 
   res = TC_SUCCESS;
   if (dirty == 0) // On efface le noeud indésirable vu qu'il est vide.
     {
       snprintf(&tmp[0], sizeof(tmp), dict_get_pattern("RepositoryClean"));
       bunny_delete_node(act->current_report, "UndesirableFound");
+      medal = "clean";
     }
   else
     {
@@ -148,16 +150,26 @@ t_technocore_result	evaluate_cleanliness(const char			*argv,
 	  snprintf(&tmp[0], sizeof(tmp),
 		   dict_get_pattern("RepositoryDirty"),
 		   dirty, nbr);
+	  medal = "dirty";
 	}
       else
-	snprintf(&tmp[0], sizeof(tmp),
-		 dict_get_pattern("RepositoryCleanEnough"),
-		 dirty, nbr);
+	{
+	  snprintf(&tmp[0], sizeof(tmp),
+		   dict_get_pattern("RepositoryCleanEnough"),
+		   dirty, nbr);
+	  medal = "unclean";
+	}
     }
   if (!add_to_current_report(act, tmp, "Conclusion"))
     { // LCOV_EXCL_START
       add_message(&gl_technocore.error_buffer,
 		  "Fail to write conclusion for cleanliness module.\n");
+      return (TC_CRITICAL);
+    } // LCOV_EXCL_STOP
+  if (!bunny_configuration_getf(exe, NULL, "NoMedals") &&
+      !add_exercise_medal(act, medal))
+    { // LCOV_EXCL_START
+      add_message(&gl_technocore.error_buffer, "Cannot add cleanliness medal.\n");
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
 

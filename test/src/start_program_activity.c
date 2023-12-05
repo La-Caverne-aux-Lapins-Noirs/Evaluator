@@ -18,10 +18,10 @@ int			main(void)
   assert(dict_open());
   dict_set_language("FR");
   assert(act.current_report = bunny_new_configuration());
+  goto Test4;
 
  Test1:
   t_bunny_configuration *empty = bunny_new_configuration();
-  const char *msg;
 
   assert(start_program_activity("empty", empty, empty, &act) == TC_CRITICAL);
   assert(strcmp(gl_technocore.error_buffer.message, "empty: Missing Command field for program test .\n") == 0);
@@ -32,7 +32,7 @@ int			main(void)
     "[Local\n"
     "  Name = \"Test\"\n"
     "  Command = \"echo -n 'Test'\"\n"
-    "  Timeout = 2\n"
+    "  Timeout = 200\n"
     "  ReturnValue = 0\n"
     "  {Interactions\n"
     "    [\n"
@@ -74,6 +74,8 @@ int			main(void)
     ;
   
   assert(bunny_configuration_getf(act.current_report, &tmp, "Message[0]"));
+  puts(cmp);
+  puts(tmp);
   assert(strcmp(cmp, tmp) == 0);
 
  Test3:

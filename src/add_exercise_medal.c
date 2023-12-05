@@ -10,6 +10,8 @@
 bool			add_exercise_medal(t_technocore_activity	*act,
 					   const char			*md)
 {
+  if (!act->current_report)
+    return (true);
   if (bunny_configuration_getf(act->current_report, NULL, "Medals") == false)
     return (bunny_configuration_setf(act->current_report, md, "Medals[0]"));
   ssize_t		len;

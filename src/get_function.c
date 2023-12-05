@@ -27,7 +27,7 @@ t_function		*get_function(const char		*argv0,
     str = NULL;
   if ((func.handler = dlopen(str, RTLD_NOW)) == NULL)
     {
-      add_exercise_message(act, "CannotFindLibrary", str);
+      add_exercise_message(act, dict_get_pattern("CannotFindLibrary"), str, dlerror());
       return (NULL);
     }
   func.function = NULL;

@@ -153,21 +153,24 @@ t_technocore_result	evaluate_object_build(const char		*argv,
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
   t_technocore_result	res;
+  const char		*med;
 
   res = TC_SUCCESS;
   if (warning == 0 && error == 0)
     {
       snprintf(&tmp[0], sizeof(tmp), dict_get_pattern("ObjectBuildOk"));
       bunny_delete_node(act->current_report, "FailedObject");
+      med = "object_build";
     }
   else
     {
-      int	nbr;
+      int		nbr;
 
       if (!bunny_configuration_getf(exe, &nbr, "Tolerance"))
 	nbr = 0;
       if (error != 0)
 	{
+	  med = "not_build";
 	  res = TC_FAILURE;
 	  snprintf(&tmp[0], sizeof(tmp),
 		   dict_get_pattern("ObjectBuildFail"),
@@ -175,15 +178,19 @@ t_technocore_result	evaluate_object_build(const char		*argv,
 	}
       else if (warning > nbr)
 	{
+	  med = "too_many_warnings";
 	  res = TC_FAILURE;
 	  snprintf(&tmp[0], sizeof(tmp),
 		   dict_get_pattern("ObjectBuildBad"),
 		   warning, nbr);
 	}
       else
-	snprintf(&tmp[0], sizeof(tmp),
-		 dict_get_pattern("ObjectBuildGoodEnough"),
-		 warning, nbr);
+	{
+	  med = "warnings";
+	  snprintf(&tmp[0], sizeof(tmp),
+		   dict_get_pattern("ObjectBuildGoodEnough"),
+		   warning, nbr);
+	}
     }
   if (!add_to_current_report(act, tmp, "Conclusion"))
     { // LCOV_EXCL_START
@@ -191,6 +198,13 @@ t_technocore_result	evaluate_object_build(const char		*argv,
 		  "Fail to write conclusion for object build module.\n");
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
+  if (!bunny_configuration_getf(exe, NULL, "NoMedals") &&
+      !add_exercise_medal(act, med))
+    { // LCOV_EXCL_START
+      add_message(&gl_technocore.error_buffer, "Cannot add object build medal.\n");
+      return (TC_CRITICAL);
+    } // LCOV_EXCL_STOP
+
   return (res);
 }
 

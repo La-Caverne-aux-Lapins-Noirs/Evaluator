@@ -6,6 +6,7 @@
 */
 
 #define				_GNU_SOURCE
+#include			<fcntl.h>
 #include			<limits.h>
 #include			<unistd.h>
 #include			<signal.h>
@@ -14,6 +15,7 @@
 #include			<errno.h>
 #include			"technocore.h"
 
+static char			prog_buffer[16 * 1024 * 1024];
 int				__stdin;
 int				__stdout;
 
@@ -42,13 +44,15 @@ static t_technocore_result	interaction(const char				*argv0,
 {
   const char			*input;
   const char			*output;
-  int				len;
+  ssize_t			ret;
+  size_t			len;
 
+  bunny_big_buffer[0] = '\0';
   if (bunny_configuration_getf(cnf, &input, "Input"))
     {
-      if ((len = strlen(input)) == 0)
+      if ((ret = strlen(input)) == 0)
 	close(in);
-      else if (write(in, input, len) == -1)
+      else if (write(in, input, ret) == -1)
 	{ // LCOV_EXCL_START
 	  add_message
 	    (&gl_technocore.error_buffer,
@@ -59,33 +63,51 @@ static t_technocore_result	interaction(const char				*argv0,
     }
   if (bunny_configuration_getf(cnf, &output, "Output"))
     {
-      ssize_t			ret;
-
-      if ((ret = read(out, bunny_big_buffer, sizeof(bunny_big_buffer) - 1)) == -1)
+      len = 0;
+      ret = 1;
+      while (errno != EBADF && ret != 0)
 	{
-	  if (errno == EINTR || errno == EBADF)
+	  errno = 0;
+	  if ((ret = read(out, &prog_buffer[len], 1)) > 0)
 	    {
-	      strcpy(bunny_big_buffer, "TIMEOUT");
-	      ret = 7;
+	      if ((len += 1) >= sizeof(prog_buffer) - 1)
+		{
+		  add_message
+		    (&gl_technocore.error_buffer,
+		     "%s: Data input is too big for test program %s.\n",
+		     argv0);
+		  return (TC_CRITICAL);
+		}
+	      if (prog_buffer[len - 1] == '\n')
+		break ;
 	    }
-	  else
-	    { // LCOV_EXCL_START
-	      add_message
-		(&gl_technocore.error_buffer,
-		 "%s: Cannot read data from program for program test %s:%s.\n",
-		 argv0, name, strerror(errno));
-	      return (TC_CRITICAL);
-	    } // LCOV_EXCL_STOP
+	  else if (ret == -1 && errno != EAGAIN)
+	    break ;
+	  else if (usleep(10) == -1)
+	    {
+	      ret = 0;
+	      strcpy(prog_buffer, "TIMEOUT");
+	      break ; // Timeout!
+	    }
 	}
-      bunny_big_buffer[ret] = '\0';
-
-      if (ret == 0)
+      prog_buffer[len] = '\0';
+      
+      if (ret == -1 && errno == EBADF)
 	{
 	  if (*output != '\0')
-	    return (do_string_diff(act, name, bunny_big_buffer, "EOF", -1)); // LCOV_EXCL_LINE
+	    return (do_string_diff(act, name, prog_buffer, "EOF", -1)); // LCOV_EXCL_LINE
 	  return (TC_SUCCESS);
 	}
-      if (strcmp(bunny_big_buffer, "TIMEOUT") == 0)
+      if (ret == -1 && errno != EAGAIN)
+	{
+	  add_message
+	    (&gl_technocore.error_buffer,
+	     "%s: Cannot read data from program for program test %s:%s.\n",
+	     argv0, name, strerror(errno));
+	  return (TC_CRITICAL);
+	}
+
+      if (strcmp(prog_buffer, "TIMEOUT") == 0)
 	{ // LCOV_EXCL_START
 	  if (add_exercise_message(act, dict_get_pattern("Timeout"), maxtm) == false)
 	    {
@@ -94,28 +116,28 @@ static t_technocore_result	interaction(const char				*argv0,
 	    }
 	  return (TC_FAILURE);
 	} // LCOV_EXCL_STOP
-      if (strcmp(bunny_big_buffer, "DUPFAIL") == 0)
+      if (strcmp(prog_buffer, "DUPFAIL") == 0)
 	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "%s: Error while duping fds in program test %s.\n", argv0, name);
 	  return (TC_CRITICAL);
 	} // LCOV_EXCL_STOP
-      if (strcmp(bunny_big_buffer, "SIGNALFAIL") == 0)
+      if (strcmp(prog_buffer, "SIGNALFAIL") == 0)
 	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "%s: Error while setting sighandler in program test %s.\n", argv0, name);
 	  return (TC_CRITICAL);
 	} // LCOV_EXCL_STOP
-      if (strcmp(bunny_big_buffer, "MALLOCFAIL") == 0)
+      if (strcmp(prog_buffer, "MALLOCFAIL") == 0)
 	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "%s: Error allocating environment for program test %s.\n", argv0, name);
 	  return (TC_CRITICAL);
 	} // LCOV_EXCL_STOP
-      if (strcmp(bunny_big_buffer, "NO_EXECUTION") == 0)
+      if (strcmp(prog_buffer, "NO_EXECUTION") == 0)
 	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "%s: Program %s was not run for unknown reason.\n", argv0, name);
 	  return (TC_CRITICAL);
 	} // LCOV_EXCL_STOP
 
-      return (do_string_diff(act, name, bunny_big_buffer, output, -1));
+      return (do_string_diff(act, name, prog_buffer, output, -1));
     }
   return (TC_SUCCESS);
 }
@@ -151,6 +173,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
   shcall[2] = command;
   bunny_configuration_getf(exe_cnf, &timeout, "Timeout");
   bunny_configuration_getf(exe_cnf, &return_value, "ReturnValue");
+  // Pipe normal pour l'entrée du programme enfant, on a besoin qu'il attende
   if (pipe(inpipe) == -1)
     { // LCOV_EXCL_START
       add_message
@@ -159,7 +182,9 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	 argv0, name, strerror(errno));
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
-  if (pipe(outpipe) == -1)
+  // Pipe non bloquant pour la sortie du programme enfant, afin d'assurer
+  // le respect d'une longueur dépendant du champ d'entrée
+  if (pipe2(outpipe, O_NONBLOCK) == -1)
     { // LCOV_EXCL_START
       add_message
 	(&gl_technocore.error_buffer,
@@ -249,7 +274,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
   int				wstatus;
 
   for (int i = 0; bunny_configuration_getf(exe_cnf, &cnf, "Interactions[%d]", i); ++i)
-    if ((result = interaction(argv0, name, act, cnf, inpipe[1], outpipe[0], timeout)) == TC_CRITICAL)
+    if ((result = interaction(argv0, name, act, cnf, inpipe[1], __stdout, timeout)) == TC_CRITICAL)
       goto KillProcess2; // LCOV_EXCL_LINE
 
   // On ferme les moyens de communication
