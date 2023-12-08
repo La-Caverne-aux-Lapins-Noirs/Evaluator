@@ -21,7 +21,7 @@ typedef struct			s_message
 
 bool				add_message(t_message			*msg,
 					    const char			*str,
-					    ...);
+					    ...) _BFMT(2, 3);
 # define			purge_message(msg)			(msg)->length = 0
 # define			message_len(msg)			((msg)->length)
 # define			get_message(msg)			((msg)->message)
@@ -179,7 +179,7 @@ bool				add_exercise_all_medals(t_technocore_activity	*act,
 							const char		*field);
 bool				add_exercise_message(t_technocore_activity	*act,
 						     const char			*msg,
-						     ...);
+						     ...) _BFMT(2, 3);
 void				rseed(void);
 
 size_t				get_allocated_byte_count(void);
@@ -187,7 +187,7 @@ size_t				get_allocated_byte_count(void);
 bool				add_to_current_report(t_technocore_activity	*act,
 						      const char		*value,
 						      const char		*pattern,
-						      ...);
+						      ...) _BFMT(3, 4);
 
 bool				file_exists(const char				*str);
 

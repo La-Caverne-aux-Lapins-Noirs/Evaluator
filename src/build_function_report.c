@@ -213,6 +213,16 @@ static t_technocore_result	build_func_report(t_technocore_activity		*act,
 	    } // LCOV_EXCL_STOP
 	  if (add_medal(act, exe, "MaximumPerfRatioMedals") == false)
 	    return (TC_CRITICAL);
+	  if (res->perf_ratio < crit->perf_ratio / 2.0)
+	    {
+	      if (add_medal(act, exe, "SuperPerfRatioMedals") == false)
+		return (TC_CRITICAL);
+	      if (res->perf_ratio < crit->perf_ratio / 5.0)
+		{
+		  if (add_medal(act, exe, "IncrediblePerfRatioMedals") == false)
+		    return (TC_CRITICAL);
+		}
+	    }
 	}
     }
 

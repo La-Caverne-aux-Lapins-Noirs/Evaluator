@@ -10,6 +10,8 @@
   Illegal = "Illegal instruction.\n"
   Signal = "Signal %d received.\n"
   NoPrintWereExpectedOn = "No print were expected on %s. Got '%s'.\n"
+  Received = "received"
+  WasExpected = "was expected"  
 
   MissingFunction = "No %s function found.\n"
   BrokenFunction = "Function %s does not work at all.\n"
@@ -101,7 +103,9 @@
   Illegal = "Instruction illégale.\n"
   Signal = "Signal %d reçu."
   NoPrintWereExpectedOn = "Aucune écriture n'était attendue sur %s. '%s' obtenu.\n"
-
+  Received = "reçu"
+  WasExpected = "était attendu"
+    
   MissingFunction = "La fonction %s n'a pas été trouvée.\n"
   BrokenFunction = "La fonction %s ne marche pas du tout.\n"
   AlmostFunction = "La fonction %s ne fonctionne pas dans certains cas spécifique..\n"

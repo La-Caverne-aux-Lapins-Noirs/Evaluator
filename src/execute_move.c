@@ -33,7 +33,7 @@ t_technocore_result	execute_move(const char				*argv,
     { // LCOV_EXCL_START
       add_message(&gl_technocore.error_buffer,
 		  "%s: Cannot get current working directory for Move command. %s.\n",
-		  *argv, strerror(errno));
+		  argv, strerror(errno));
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
 
@@ -66,14 +66,14 @@ t_technocore_result	execute_move(const char				*argv,
 	return (TC_FAILURE);
       // LCOV_EXCL_START
       add_message(&gl_technocore.error_buffer,
-		  "%s: Cannot notify directory change to %s from %s "
-		  "failure because of %s.\n",
-		  *argv, cmd, strerror(errno));
+		  "%s: Cannot notify directory change to %s from %s's failure "
+		  "because of %s.\n",
+		  argv, cmd, act->pathstack[act->nbr_path - 1], strerror(errno));
       return (TC_CRITICAL);
     }
   add_message(&gl_technocore.error_buffer,
 	      "%s: Cannot move to directory %s. %s.\n",
-	      *argv, cmd, strerror(errno));
+	      argv, cmd, strerror(errno));
   return (TC_CRITICAL);
   // LCOV_EXCL_STOP
 }

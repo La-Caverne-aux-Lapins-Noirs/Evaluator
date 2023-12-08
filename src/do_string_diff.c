@@ -19,7 +19,7 @@ t_technocore_result	do_string_diff(t_technocore_activity	*act,
 
   if (bunny_write_cstring(user, &first, 0) == false)
     { // LCOV_EXCL_START
-      add_message(&gl_technocore.error_buffer, "Not enough memory to turn user string into cstring.\n", activity_name);
+      add_message(&gl_technocore.error_buffer, "Not enough memory to turn user string into cstring for exercise %s.\n", activity_name);
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
   if (bunny_write_cstring(expected, &second, 0) == false)

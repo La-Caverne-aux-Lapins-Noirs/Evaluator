@@ -15,6 +15,7 @@ void			evaluate_performances(t_func_eval_mod	*fem,
 					      size_t		datasiz,
 					      size_t		nmemb)
 {
+  char			buffer[4096];
   void			*bench[nmemb];
   size_t		i;
 
@@ -35,6 +36,9 @@ void			evaluate_performances(t_func_eval_mod	*fem,
     perfcall(tcfunc, bench[i % nmemb]);
   tc_perf = bunny_get_time() - time_now;
   tc_ram = get_allocated_byte_count() - ram_now;
+  // On épuise le pipe
+  while (read(gl_technocore.stdout_pipe[0], buffer, sizeof(buffer)) > 0);
+  while (read(gl_technocore.stderr_pipe[0], buffer, sizeof(buffer)) > 0);
 
   ram_now = get_allocated_byte_count();
   time_now = bunny_get_time();
@@ -42,6 +46,9 @@ void			evaluate_performances(t_func_eval_mod	*fem,
     perfcall(func, bench[i % nmemb]);
   user_perf = bunny_get_time() - time_now;
   user_ram = get_allocated_byte_count() - ram_now;
+  // On épuise le pipe
+  while (read(gl_technocore.stdout_pipe[0], buffer, sizeof(buffer)) > 0);
+  while (read(gl_technocore.stderr_pipe[0], buffer, sizeof(buffer)) > 0);
 
   if (fem->criterias.perf_ratio > 0)
     fem->result.perf_ratio = (double)user_perf / tc_perf;
