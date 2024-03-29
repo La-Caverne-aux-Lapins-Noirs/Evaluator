@@ -53,6 +53,8 @@ static t_technocore_result	prepare_jump(const char				*argv0,
 	suc = add_exercise_message(act, dict_get_pattern("Bus"));
       else if (err == SIGILL)
 	suc = add_exercise_message(act, dict_get_pattern("Illegal"));
+      else if (err == SIGABRT)
+	suc = add_exercise_message(act, dict_get_pattern("Abort"));
       else
 	suc = add_exercise_message(act, dict_get_pattern("Signal"), err); // LCOV_EXCL_LINE
       if (suc == false)

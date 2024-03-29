@@ -5,6 +5,7 @@
 ** TechnoCore
 */
 
+#include		<time.h>
 #include		<stdio.h>
 #include		<stdlib.h>
 #include		<errno.h>
@@ -57,7 +58,9 @@ int			main(int		argc,
   bunny_configuration_push_path(tmp);
   
   t_bunny_configuration	*cnf;
+  t_technocore_result	result;
 
+  srand(clock());
   // On se deplace dans chaque dossier courant et on passe a l'etape suivante pour chacun d'entre eux
   for (int i = 1; i < argc; ++i)
     {
@@ -90,7 +93,11 @@ int			main(int		argc,
       bunny_set_error_descriptor(-1);
 
       // On lance l'evaluation de l'activité
-      if (start_activity(*argv, cnf) == TC_CRITICAL)
+      tcdebug_buffer[0] = 0;
+      result = start_activity(*argv, cnf);
+      if (tcdebug_buffer[0])
+	puts(tcdebug_buffer);
+      if (result == TC_CRITICAL)
 	return (EXIT_FAILURE);
 
       // On revient au dossier d'avant. Le if est pour inhiber -Wunused-result

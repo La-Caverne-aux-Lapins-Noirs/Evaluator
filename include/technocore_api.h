@@ -7,7 +7,9 @@
 
 #ifndef				__TECHNOCORE_API_H__
 # define			__TECHNOCORE_API_H__
-# include		       <lapin.h>
+# include			<lapin.h>
+
+# define			NOINLINE				__attribute__ ((noinline))
 
 // Le type de la fonction de test élève
 typedef int			(*t_test_func)(void);
@@ -196,6 +198,11 @@ t_technocore_result		do_string_diff(t_technocore_activity		*act,
 					       const char			*user,
 					       const char			*ref,
 					       int				maxlen);
+t_technocore_result		do_mem_diff(t_technocore_activity		*act,
+					    const char				*name,
+					    const char				*user,
+					    const char				*ref,
+					    int					len);
 void				evaluate_test_efficiency(t_trigger		*trigger,
 							 t_func_eval_mod	*fem,
 							 t_test_func		test,
@@ -229,5 +236,8 @@ void				evaluate_performances(t_func_eval_mod		*fem,
   CAT(technocore_, name)
 # define			EVFUNC(name)					\
   CAT(evaluate_, name)
+
+void				tcdebug(const char				*pat,
+					...);
 
 #endif	/*			__TECHNOCORE_API_H__				*/

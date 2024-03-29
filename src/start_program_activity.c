@@ -47,7 +47,6 @@ static t_technocore_result	interaction(const char				*argv0,
   ssize_t			ret;
   size_t			len;
 
-  bunny_big_buffer[0] = '\0';
   if (bunny_configuration_getf(cnf, &input, "Input"))
     {
       if ((ret = strlen(input)) == 0)
@@ -75,7 +74,7 @@ static t_technocore_result	interaction(const char				*argv0,
 		  add_message
 		    (&gl_technocore.error_buffer,
 		     "%s: Data input is too big for test program %s.\n",
-		     argv0);
+		     argv0, bunny_configuration_get_address(cnf));
 		  return (TC_CRITICAL);
 		}
 	      if (prog_buffer[len - 1] == '\n')

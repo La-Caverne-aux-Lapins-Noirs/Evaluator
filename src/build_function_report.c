@@ -417,6 +417,10 @@ static t_technocore_result	build_test_report(t_technocore_activity		*act,
 	return (TC_CRITICAL);
     }
 
+  if (success)
+    if (add_medal(act, exe, "SuccessMedals") == false)
+      return (TC_CRITICAL);
+  
   return (success ? TC_SUCCESS : TC_FAILURE);
 }
 

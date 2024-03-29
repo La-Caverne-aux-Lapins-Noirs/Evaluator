@@ -140,16 +140,28 @@ t_technocore_result	start_activity(const char			*argv0,
 	}
 
       // Succès, on regarde si une action à effectuer
-      if (res == TC_SUCCESS && bunny_configuration_getf(act, &str, "SetVar"))
+      if (res == TC_SUCCESS)
 	{
-	  ssize_t	p = 0;
-	  
-	  if (bunny_read_char(str, &p, fieldname_first_char) == false || str[p] != '\0')
+	  if (bunny_configuration_getf(act, &str, "SetVar"))
 	    {
-	      fprintf(stderr, "%s: Invalid SetVar field %s.\n", argv0, str);
-	      return (TC_CRITICAL);
+	      ssize_t	p = 0;
+	  
+	      if (bunny_read_char(str, &p, fieldname_first_char) == false || str[p] != '\0')
+		{
+		  fprintf(stderr, "%s: Invalid SetVar field %s.\n", argv0, str);
+		  return (TC_CRITICAL);
+		}
+	      bunny_configuration_setf(rot, 1, "Variables.%s", str);
 	    }
-	  bunny_configuration_setf(rot, 1, "Variables.%s", str);
+	  if (bunny_configuration_getf(act, &str, "Medals"))
+	    if (add_all_medals(&tech, act) == false)
+	      {
+		add_message(&gl_technocore.error_buffer,
+			    "%s: Cannot add medals for %s.\n",
+			    argv0, bunny_configuration_get_address(act)
+			    );
+		return (TC_CRITICAL);
+	      }
 	}
     }
 

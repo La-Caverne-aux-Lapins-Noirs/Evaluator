@@ -95,12 +95,14 @@ int			tcpopen(const char				*module_name,
 				char					*message,
 				size_t					msg_size);
 
+// With some cool stuff from C99.
 bool			retrieve_all_files(char				*path,
 					   size_t			maxpath,
-					   char				**files,
 					   size_t			*browse,
 					   size_t			cells,
 					   size_t			cellsize,
+					   char				files
+					   [cells][cellsize],
 					   const char			*ext);
 
 bool			add_all_medals(t_technocore_activity		*act,
@@ -124,6 +126,8 @@ t_builtin_module	evaluate_file_c_norm;
 t_builtin_module	evaluate_make_build;
 t_builtin_module	evaluate_object_build;
 t_builtin_module	evaluate_full_build;
+
+extern char		tcdebug_buffer[1024 * 1024];
 
 #endif	/*		__TECHNOCORE_H__				*/
 

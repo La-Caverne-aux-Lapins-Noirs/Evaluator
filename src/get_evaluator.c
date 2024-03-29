@@ -20,7 +20,8 @@ t_function		*get_evaluator(const char		*argv0,
   if (bunny_configuration_getf(exercise_conf, &str, "Module") == false)
     if (bunny_configuration_getf(general_conf, &str, "Module") == false)
       {
-	fprintf(stderr, "%s: Cannot find node Module in activity file.\n", argv0);
+	str = bunny_configuration_get_address(exercise_conf);
+	fprintf(stderr, "%s: Cannot find node Module in %s activity file.\n", argv0, str);
 	return (NULL);
       }
   if (strcmp("local", str) == 0)

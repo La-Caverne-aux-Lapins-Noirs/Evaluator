@@ -14,10 +14,11 @@
 
 bool			retrieve_all_files(char			*path,
 					   size_t		maxpath,
-					   char			**files,
 					   size_t		*browse,
 					   size_t		cells,
 					   size_t		cellsize,
+					   char			files
+					   [cells][cellsize],
 					   const char		*ext)
 {
   char			*basepath;
@@ -49,7 +50,7 @@ bool			retrieve_all_files(char			*path,
 	      basepath[0] = '/';
 	      basepath[1] = '\0';
 	      strcat(&basepath[1], dirent->d_name);
-	      if (!retrieve_all_files(path, maxpath, files, browse, cells, cellsize, ext))
+	      if (!retrieve_all_files(path, maxpath, browse, cells, cellsize, files, ext))
 		return (false);
 	      *basepath = '\0';
 	    }

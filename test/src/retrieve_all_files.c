@@ -12,12 +12,10 @@
 int			main(void)
 {
   char			path[512];
-  char			*buffer[16];
+  char			buffer[16][64];
   size_t		nbr;
   size_t		fnd;
 
-  for (size_t i = 0; i < NBRCELL(buffer); ++i)
-    buffer[i] = alloca(64);
   if (chdir("./raf/") != 0)
     if (chdir("./res/raf/") != 0)
       if (chdir("./src/res/raf") != 0)
@@ -26,7 +24,7 @@ int			main(void)
   nbr = 0;
   path[0] = '.';
   path[1] = '\0';
-  assert(retrieve_all_files(path, NBRCELL(path), buffer, &nbr, 16, 64, ".x"));
+  assert(retrieve_all_files(path, NBRCELL(path), &nbr, 16, 64, buffer, ".x"));
   assert(nbr == 7);
   fnd = 0;
   for (size_t i = 0; i < nbr; ++i)

@@ -9,15 +9,13 @@
 #include		<crawler.h>
 #include		"technocore.h"
 
-#define			MAXPATH					256
-
 t_technocore_result evaluate_file_c_norm(const char		*argv0,
 					 t_bunny_configuration	*gen,
 					 t_bunny_configuration	*exe,
 					 t_technocore_activity	*act)
 {
+  static char		files[1024 * 8][256];
   char			basepath[512] = ".";
-  char			*files[1024 * 8];
   size_t		cnt;
   t_parsing		p;
   ssize_t		i;
@@ -25,12 +23,9 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
   (void)argv0;
   (void)gen;
   
-  for (i = 0; i < NBRCELL(files); ++i)
-    files[i] = alloca(MAXPATH);
-  
   cnt = 0;
   memset(&p, 0, sizeof(p));
-  if (!retrieve_all_files(basepath, NBRCELL(basepath), files, &cnt, NBRCELL(files), MAXPATH, ".c"))
+  if (!retrieve_all_files(basepath, NBRCELL(basepath), &cnt, NBRCELL(files), NBRCELL(files[0]), files, ".c"))
     { // LCOV_EXCL_START
       add_message(&gl_technocore.error_buffer, "Cannot retrieve all %s files from repository.\n", ".c");
       return (TC_CRITICAL);
@@ -42,11 +37,11 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
       char		*code;
 
       // Pour chaque fichier .c
-      if ((code = load_c_file(files[j], exe, false)) == NULL)
+      if ((code = load_c_file(files[j], exe, true)) == NULL)
 	return (TC_CRITICAL);
       i = 0;
       reset_norm_status(&p);
-      read_translation_unit(&p, files[j], code, &i, false);
+      read_translation_unit(&p, files[j], code, &i, false, true);
     }
 
   for (int j = 0; j <= p.last_error_id;  ++j)
