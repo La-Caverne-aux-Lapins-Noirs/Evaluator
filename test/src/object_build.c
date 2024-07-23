@@ -99,18 +99,18 @@ int			main(void)
   assert(evaluate_object_build("a", local, local, &act) == TC_FAILURE);
   assert(bunny_configuration_getf(act.current_report, &str, "Conclusion"));
   assert(strcmp(str, "The compilation was not possible (1 error(s), 1 warning(s) with a 0 margin).\n") == 0);
-  assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[0].File"));
+  assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[1].File"));
   assert(strcmp(str, "./warning.c") == 0);
-  assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[0].Status"));
+  assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[1].Status"));
   assert(strcmp(str, "Warning") == 0);
-  assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[0].Message"));
+  assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[1].Message"));
   assert(strstr(str, "makes pointer from integer"));
 
-  assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[1].File"));
+  assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[0].File"));
   assert(strcmp(str, "./error.c") == 0);
-  assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[1].Status"));
+  assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[0].Status"));
   assert(strcmp(str, "Error") == 0);
-  assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[1].Message"));
+  assert(bunny_configuration_getf(act.current_report, &str, "FailedObject[0].Message"));
   assert
     (almost_equal
      (str,

@@ -6,6 +6,7 @@
 */
 
 #include		<dlfcn.h>
+#include		<unistd.h>
 #include		"technocore.h"
 
 t_function		*get_function(const char		*argv0,
