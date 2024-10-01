@@ -32,8 +32,8 @@
   ETC_DIR	?=	/opt/technocore/
   LIB_TESTDIR	?=	$(HOME)/.froot/lib/
 
-  LIB		=	-L$(HOME)/.froot/lib/ -llapin -lcrawler -lsfml-graphics \
-			-lsfml-audio -lsfml-window -lsfml-system		\
+  LIB		=	-L$(HOME)/.froot/lib/ -llapin -lcrawler -lsfml-graphics-s \
+			-lsfml-audio-s -lsfml-window-s -lsfml-system-s		\
 			-ldl -lm -lstdc++ -lavcall -lgcov -rdynamic
   CONFIG	?=	$(FLAG) -fPIC -std=c11 -Wno-format-security		\
 			-Wall -Wextra
