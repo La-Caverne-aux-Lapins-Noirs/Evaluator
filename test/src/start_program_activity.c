@@ -20,13 +20,13 @@ int			main(void)
   assert(act.current_report = bunny_new_configuration());
   goto Test4;
 
- Test1:
+ Test1: ;
   t_bunny_configuration *empty = bunny_new_configuration();
 
   assert(start_program_activity("empty", empty, empty, &act) == TC_CRITICAL);
   assert(strcmp(gl_technocore.error_buffer.message, "empty: Missing Command field for program test .\n") == 0);
-
- Test12:
+  
+ Test12: ;
   const char		*code9 =
     "\n"
     "[Local\n"
@@ -46,6 +46,8 @@ int			main(void)
     "]"
     ;
   
+  char			buffer[4096];
+
   bunny_delete_configuration(act.current_report);
   memset(&act, 0, sizeof(act));
   assert((act.current_report = bunny_new_configuration()));
@@ -57,23 +59,26 @@ int			main(void)
   assert(start_program_activity("aaa", global, local, &act) == TC_SUCCESS);
   bunny_delete_configuration(global);
   
- Test2:
+ Test2: ;
   const char		*code =
     "\n"
     "[Local\n"
     "  Name = \"Test\"\n"
-    "  Command = \"echo -n 'Test'\"\n"
-    "  Timeout = 200\n"
-    "  ReturnValue = 0\n"
-    "  {Interactions\n"
+    "  {Program/n"
     "    [\n"
-    "      Output = \"Test%s\"\n"
+    "      Command = \"echo -n 'Test'\"\n"
+    "      Timeout = 200\n"
+    "      ReturnValue = 0\n"
+    "      {Interactions\n"
+    "        [\n"
+    "          Output = \"Test%s\"\n"
+    "        ]\n"
+    "      }\n"
     "    ]\n"
     "  }\n"
     "]"
     ;
 
-  char			buffer[4096];
 
   bunny_delete_configuration(act.current_report);
   memset(&act, 0, sizeof(act));
@@ -110,27 +115,31 @@ int			main(void)
   puts(tmp);
   assert(strcmp(cmp, tmp) == 0);
 
- Test3:
+ Test3: ;
   // Deux interactions
   const char		*code2 =
     "\n"
     "[Local\n"
     "  Name = \"Test\"\n"
-    "  Command = \"cat\"\n"
-    "  Timeout = 50\n"
-    "  ReturnValue = 0\n"
-    "  {Interactions\n"
+    "  {Program/n"
     "    [\n"
-    "      Input = \"Test\\n\"\n"
-    "      Output = \"Test\\n\"\n"
-    "    ],\n"
-    "    [\n"
-    "      Input = \"Test2\\n\"\n"
-    "      Output = \"Test2\\n\"\n"
-    "    ],\n"
-    "    [\n"
-    "      Input = \"\"\n"
-    "      Output = \"\"\n"
+    "      Command = \"cat\"\n"
+    "      Timeout = 50\n"
+    "      ReturnValue = 0\n"
+    "      {Interactions\n"
+    "        [\n"
+    "          Input = \"Test\\n\"\n"
+    "          Output = \"Test\\n\"\n"
+    "        ],\n"
+    "        [\n"
+    "          Input = \"Test2\\n\"\n"
+    "          Output = \"Test2\\n\"\n"
+    "        ],\n"
+    "        [\n"
+    "          Input = \"\"\n"
+    "          Output = \"\"\n"
+    "        ]\n"
+    "      }\n"
     "    ]\n"
     "  }\n"
     "]"
@@ -147,18 +156,22 @@ int			main(void)
   assert(start_program_activity("aaa", global, local, &act) == TC_SUCCESS);
   bunny_delete_configuration(global);
 
- Test4:
+ Test4: ;
   // Timeout
   const char		*code3 =
     "\n"
     "[Local\n"
     "  Name = \"Test\"\n"
-    "  Command = \"cat\"\n"
-    "  Timeout = 1\n"
-    "  ReturnValue = 0\n"
-    "  {Interactions\n"
+    "  {Program/n"
     "    [\n"
-    "      Output = \"Timeout is coming\"\n"
+    "      Command = \"cat\"\n"
+    "      Timeout = 1\n"
+    "      ReturnValue = 0\n"
+    "      {Interactions\n"
+    "        [\n"
+    "          Output = \"Timeout is coming\"\n"
+    "        ]\n"
+    "      }\n"
     "    ]\n"
     "  }\n"
     "]"
@@ -174,27 +187,31 @@ int			main(void)
   assert(start_program_activity("aaa", global, local, &act) == TC_FAILURE);
   bunny_delete_configuration(global);
 
- Test5:
+ Test5: ;
   // Mauvaise valeur de retour
   const char		*code4 =
     "\n"
     "[Local\n"
     "  Name = \"Test\"\n"
-    "  Command = \"cat\"\n"
-    "  Timeout = 20\n"
-    "  ReturnValue = 1\n"
-    "  {Interactions\n"
+    "  {Program/n"
     "    [\n"
-    "      Input = \"Test\\n\"\n"
-    "      Output = \"Test\\n\"\n"
-    "    ],\n"
-    "    [\n"
-    "      Input = \"Test2\\n\"\n"
-    "      Output = \"Test2\\n\"\n"
-    "    ],\n"
-    "    [\n"
-    "      Input = \"\"\n"
-    "      Output = \"\"\n"
+    "      Command = \"cat\"\n"
+    "      Timeout = 20\n"
+    "      ReturnValue = 1\n"
+    "      {Interactions\n"
+    "        [\n"
+    "          Input = \"Test\\n\"\n"
+    "          Output = \"Test\\n\"\n"
+    "        ],\n"
+    "        [\n"
+    "          Input = \"Test2\\n\"\n"
+    "          Output = \"Test2\\n\"\n"
+    "        ],\n"
+    "        [\n"
+    "          Input = \"\"\n"
+    "          Output = \"\"\n"
+    "        ]\n"
+    "      }\n"
     "    ]\n"
     "  }\n"
     "]"

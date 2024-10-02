@@ -156,6 +156,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
   pid_t				pid;
   int				return_value = INT_MAX;
   int				timeout = 2;
+  pid_t				watchdog = -2;
 
   (void)general_cnf;
 
@@ -245,8 +246,6 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	} // LCOV_EXCL_STOP
       close(inpipe[0]);
       close(outpipe[1]);
-
-      pid_t				watchdog;
   
       if (timeout > 0)
 	{
@@ -280,7 +279,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
       int				status;
       int				wstatus;
 
-      for (int i = 0; bunny_configuration_getf(exe_cnf, &cnf, "Program[%d].Interactions[%d]", j, i); ++i)
+      for (int i = 0; bunny_configuration_getf(temCnf, &cnf, "Interactions[%d]", i); ++i)
 	if ((result = interaction(argv0, name, act, cnf, inpipe[1], __stdout, timeout)) == TC_CRITICAL)
 	  goto KillProcess2; // LCOV_EXCL_LINE
 
@@ -321,12 +320,11 @@ t_technocore_result		start_program_activity(const char		*argv0,
 		} // LCOV_EXCL_STOP
 	      return (TC_FAILURE);
 	    }
-	}
+	} 
     }
-
   // Tout est nickel, on s'en va
   return (result);
-
+  
   // LCOV_EXCL_START
   // Les cas d'erreurs.
  KillProcess2:
