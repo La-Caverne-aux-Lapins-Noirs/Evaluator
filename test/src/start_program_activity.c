@@ -18,7 +18,7 @@ int			main(void)
   assert(dict_open());
   dict_set_language("FR");
   assert(act.current_report = bunny_new_configuration());
-  goto Test4;
+  goto Test1;
 
  Test1: ;
   t_bunny_configuration *empty = bunny_new_configuration();
@@ -26,49 +26,8 @@ int			main(void)
   assert(start_program_activity("empty", empty, empty, &act) == TC_CRITICAL);
   assert(strcmp(gl_technocore.error_buffer.message, "empty: Missing Command field for program test .\n") == 0);
   
- Test12: ;
-  const char		*code9 =
-    "\n"
-    "[Local\n"
-    "  Name = \"Test\"\n"
-    "  {Program\n"
-    "    [\n"
-    "      Command = \"echo Test\"\n"
-    "      Timeout = 200\n"
-    "      ReturnValue = 0\n"
-    "      {Interactions\n"
-    "        [\n"
-    "          Output = \"Test\"\n"
-    "        ]\n"
-    "      }\n"
-    "    ],\n"
-    "    [\n"
-    "      Command = \"echo Test2\"\n"
-    "      Timeout = 200\n"
-    "      ReturnValue = 0\n"
-    "      {Interactions\n"
-    "        [\n"
-    "          Output = \"Test2\"\n"
-    "        ]\n"
-    "      }\n"
-    "    ]\n"
-    "  }\n"
-    "]"
-    ;
-  
   char			buffer[4096];
 
-  bunny_delete_configuration(act.current_report);
-  memset(&act, 0, sizeof(act));
-  assert((act.current_report = bunny_new_configuration()));
-
-  snprintf(buffer, sizeof(buffer), code9);
-  assert(global = bunny_read_configuration(BC_DABSIC, buffer, NULL));
-  // bunny_save_configuration(BC_DABSIC, "/dev/stderr", global);
-  assert(bunny_configuration_getf(global, &local, "Local"));
-  assert(start_program_activity("aaa", global, local, &act) == TC_SUCCESS);
-  bunny_delete_configuration(global);
-  
  Test2: ;
   const char		*code =
     "\n"
@@ -238,7 +197,90 @@ int			main(void)
   assert(start_program_activity("aaa", global, local, &act) == TC_FAILURE);
   bunny_delete_configuration(global);
 
+  Test6: ;
+  const char		*code9 =
+    "\n"
+    "[Local\n"
+    "  Name = \"Test\"\n"
+    "  {Program\n"
+    "    [\n"
+    "      Command = \"echo Test\"\n"
+    "      Timeout = 200\n"
+    "      ReturnValue = 0\n"
+    "      {Interactions\n"
+    "        [\n"
+    "          Output = \"Test\n\"\n"
+    "        ]\n"
+    "      }\n"
+    "    ],\n"
+    "    [\n"
+    "      Command = \"echo Test2\"\n"
+    "      Timeout = 200\n"
+    "      ReturnValue = 0\n"
+    "      {Interactions\n"
+    "        [\n"
+    "          Output = \"Test2\n\"\n"
+    "        ]\n"
+    "      }\n"
+    "    ]\n"
+    "  }\n"
+    "]"
+    ;
   
+
+  bunny_delete_configuration(act.current_report);
+  memset(&act, 0, sizeof(act));
+  assert((act.current_report = bunny_new_configuration()));
+
+  snprintf(buffer, sizeof(buffer), code9);
+  assert(global = bunny_read_configuration(BC_DABSIC, buffer, NULL));
+  // bunny_save_configuration(BC_DABSIC, "/dev/stderr", global);
+  assert(bunny_configuration_getf(global, &local, "Local"));
+  assert(start_program_activity("aaa", global, local, &act) == TC_SUCCESS);
+  bunny_delete_configuration(global);
+  
+  Test7: ;
+  const char		*code7 =
+    "\n"
+    "[Local\n"
+    "  Name = \"Test\"\n"
+    "  {Program\n"
+    "    [\n"
+    "      Command = \"echo Test\"\n"
+    "      Timeout = 200\n"
+    "      ReturnValue = 0\n"
+    "      {Interactions\n"
+    "        [\n"
+    "          Output = \"Test\n\"\n"
+    "        ]\n"
+    "      }\n"
+    "    ],\n"
+    "    [\n"
+    "      Command = \"echo Test2\"\n"
+    "      Timeout = 200\n"
+    "      ReturnValue = 0\n"
+    "      {Interactions\n"
+    "        [\n"
+    "          Output = \"nimportequoi\"\n"
+    "        ]\n"
+    "      }\n"
+    "    ]\n"
+    "  }\n"
+    "]"
+    ;
+  
+
+  bunny_delete_configuration(act.current_report);
+  memset(&act, 0, sizeof(act));
+  assert((act.current_report = bunny_new_configuration()));
+
+  snprintf(buffer, sizeof(buffer), code7);
+  assert(global = bunny_read_configuration(BC_DABSIC, buffer, NULL));
+  // bunny_save_configuration(BC_DABSIC, "/dev/stderr", global);
+  assert(bunny_configuration_getf(global, &local, "Local"));
+  assert(start_program_activity("aaa", global, local, &act) == TC_FAILURE);
+  bunny_delete_configuration(global);
+
   return (EXIT_SUCCESS);
 }
 

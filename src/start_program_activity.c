@@ -164,6 +164,14 @@ t_technocore_result		start_program_activity(const char		*argv0,
     name = bunny_configuration_get_address(exe_cnf);
 
   t_bunny_configuration		*temCnf;
+  if (bunny_configuration_getf(exe_cnf, &temCnf, "Program") == false)
+    {
+      add_message
+	(&gl_technocore.error_buffer,
+	 "%s: Missing Command field for program test %s.\n",
+	 argv0, name);
+      return (TC_CRITICAL);
+    }
   // LOOP FOR PROG
   for (int j = 0; bunny_configuration_getf(exe_cnf, &temCnf, "Program[%d]", j); ++j)
     {
@@ -175,6 +183,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	     argv0, name);
 	  return (TC_CRITICAL);
 	}
+      shcall[2] = command;
       bunny_configuration_getf(temCnf, &timeout, "Timeout");
       bunny_configuration_getf(temCnf, &return_value, "ReturnValue");
       // Pipe normal pour l'entrée du programme enfant, on a besoin qu'il attende
