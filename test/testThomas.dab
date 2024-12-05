@@ -1,0 +1,10 @@
+
+Command = "echo Test2"
+{Interactions
+  [
+    Output = "nimportequoi"
+  ]
+}
+
+ReturnValue = 0
+Timeout = 200
