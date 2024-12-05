@@ -30,10 +30,15 @@ void			evaluate_performances(t_func_eval_mod	*fem,
   t_bunny_time		tc_perf;
   t_bunny_time		time_now;
 
+  char temp_bench[datasiz];
+
   time_now = bunny_get_time();
   ram_now = get_allocated_byte_count();
   for (i = 0; i < nmemb * 100; ++i)
-    perfcall(tcfunc, bench[i % nmemb]);
+    {
+      memcpy(temp_bench, bench[i % nmemb], datasiz);
+      perfcall(tcfunc, temp_bench);
+    }
   tc_perf = bunny_get_time() - time_now;
   tc_ram = get_allocated_byte_count() - ram_now;
   // On épuise le pipe
@@ -43,7 +48,10 @@ void			evaluate_performances(t_func_eval_mod	*fem,
   ram_now = get_allocated_byte_count();
   time_now = bunny_get_time();
   for (i = 0; i < nmemb * 100; ++i)
-    perfcall(func, bench[i % nmemb]);
+    {
+      memcpy(temp_bench, bench[i % nmemb], datasiz);
+      perfcall(func, temp_bench);
+    }
   user_perf = bunny_get_time() - time_now;
   user_ram = get_allocated_byte_count() - ram_now;
   // On épuise le pipe

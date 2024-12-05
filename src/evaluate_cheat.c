@@ -21,7 +21,6 @@ static int		is_cheater(const char				*func,
   // Rien n'est autorisé ou interdit => Tout est autorisé, sauf contre indication d'autre conf
   if (!blacklist && !whitelist)
     return (0);
-
   // Tout est autorisé sauf.
   if (!whitelist && blacklist)
     // Si je trouve, c'est interdit. Sinon on verra avec l'autre conf.
@@ -30,8 +29,7 @@ static int		is_cheater(const char				*func,
   // Rien n'est autorisé sauf.
   if (whitelist && !blacklist)
     // Si je trouve pas, c'est interdit. Sinon on verra avec l'autre conf.
-    return (!bunny_configuration_getf(auth, NULL, "%s", func) ? -1 : 0);
-
+    return (!bunny_configuration_getf(auth, NULL, "%s", func) ? 0 : 1);
   // Si ce n'est pas autorisé, c'est interdit
   if (bunny_configuration_getf(auth, NULL, "%s", func) == false)
     return (-1);
@@ -69,6 +67,8 @@ static bool		is_authorized(const char			*func,
       b = is_cheater(func, auth, forb);
     }
 
+  if (a == 0 && b == 0 && auth != NULL && forb == NULL)
+    a = -1;
   if (b == 0) // Si le local ne sait pas, le global l'emporte.
     return (a != -1);
   return (b != -1);

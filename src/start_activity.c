@@ -40,6 +40,7 @@ t_technocore_result	start_activity(const char			*argv0,
   const char		*str;
   int			failedcnt;
   int			excnt;
+  char			debug_buffer[248];
 
   failedcnt = 0;
   res = TC_CRITICAL;
@@ -53,6 +54,7 @@ t_technocore_result	start_activity(const char			*argv0,
   excnt = 0;
   for (i = 0; bunny_configuration_getf(cnf, &act, "Exercises[%d]", i); ++i)
     {
+      getcwd(debug_buffer, sizeof(debug_buffer));
       if (bunny_configuration_getf(cnf, &str, "."))
 	continue ; // LCOV_EXCL_LINE Si le noeud est une chaine de caractère, c'est une directive pour docbuilder...
 
