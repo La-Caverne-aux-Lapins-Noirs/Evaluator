@@ -286,7 +286,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
 
       t_bunny_configuration		*cnf;
       int				status;
-      int				wstatus;
+      int				wstatus = EXIT_SUCCESS;
 
       for (int i = 0; bunny_configuration_getf(temCnf, &cnf, "Interactions[%d]", i); ++i)
 	if ((result = interaction(argv0, name, act, cnf, inpipe[1], __stdout, timeout)) == TC_CRITICAL)
