@@ -133,10 +133,10 @@ static t_technocore_result	prepare_io(const char				*argv0,
  ClosePipes:
   close(gl_technocore.stdin_pipe[0]);
   close(gl_technocore.stdin_pipe[1]);
-  close(gl_technocore.stdin_pipe[0]);
-  close(gl_technocore.stdin_pipe[1]);
-  close(gl_technocore.stdin_pipe[0]);
-  close(gl_technocore.stdin_pipe[1]);
+  close(gl_technocore.stdout_pipe[0]);
+  close(gl_technocore.stdout_pipe[1]);
+  close(gl_technocore.stderr_pipe[0]);
+  close(gl_technocore.stderr_pipe[1]);
  CloseDups:
   close(std_in);
   close(std_out);

@@ -30,8 +30,8 @@ t_function		*get_evaluator(const char		*argv0,
     {
       char		buffer[512];
 
-      snprintf(&buffer[0], sizeof(buffer), "/opt/technocore/function/%s", str);
-      if ((handler = dlopen(str, RTLD_NOW)) == NULL)
+      snprintf(&buffer[0], sizeof(buffer), "/opt/technocore/functions/%s", str);
+      if ((handler = dlopen(buffer, RTLD_NOW)) == NULL)
 	{
 	  fprintf(stderr, "%s: Cannot open Module %s (%s).\n", argv0, str, dlerror());
 	  return (NULL);
