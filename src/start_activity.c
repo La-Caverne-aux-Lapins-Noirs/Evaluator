@@ -54,7 +54,11 @@ t_technocore_result	start_activity(const char			*argv0,
   excnt = 0;
   for (i = 0; bunny_configuration_getf(cnf, &act, "Exercises[%d]", i); ++i)
     {
-      getcwd(debug_buffer, sizeof(debug_buffer));
+      if (getcwd(debug_buffer, sizeof(debug_buffer)) == NULL)
+	{
+	  fprintf(stderr, "%s: Failed to fetch working directory %s.\n", argv0, strerror(errno));
+	  return (TC_CRITICAL);
+	}
       if (bunny_configuration_getf(cnf, &str, "."))
 	continue ; // LCOV_EXCL_LINE Si le noeud est une chaine de caractère, c'est une directive pour docbuilder...
 
@@ -158,11 +162,13 @@ t_technocore_result	start_activity(const char			*argv0,
 	  if (bunny_configuration_getf(act, &str, "Medals"))
 	    if (add_all_medals(&tech, act) == false)
 	      {
-		add_message(&gl_technocore.error_buffer,
-			    "%s: Cannot add medals for %s.\n",
-			    argv0, bunny_configuration_get_address(act)
-			    );
-		return (TC_CRITICAL);
+		fprintf
+		  (stderr,
+		   "%s: Cannot add medals for %s.\n",
+		   argv0, bunny_configuration_get_address(act)
+		   );
+		res = TC_CRITICAL;
+		goto DeleteTA;
 	      }
 	}
     }
@@ -173,14 +179,15 @@ t_technocore_result	start_activity(const char			*argv0,
   while (tech.nbr_path > 0)
     if (chdir(tech.pathstack[--tech.nbr_path]) != 0)
       {
-	add_message
-	  (&gl_technocore.error_buffer,
+	fprintf
+	  (stderr,
 	   "%s: Cannot rewind path to %s at the end of evaluation. %s.\n",
 	   argv0,
 	   tech.pathstack[tech.nbr_path],
 	   strerror(errno)
 	   );
-	return (TC_CRITICAL);
+	res = TC_CRITICAL;
+	goto DeleteTA;
       }
   
   // On construit le bilan de l'évaluation.

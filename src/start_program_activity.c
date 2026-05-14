@@ -19,6 +19,26 @@ static char			prog_buffer[16 * 1024 * 1024];
 int				__stdin;
 int				__stdout;
 
+static pid_t			waitpid_no_intr(pid_t				pid,
+						int				*status)
+{
+  pid_t				ret;
+
+  do
+    ret = waitpid(pid, status, 0);
+  while (ret == -1 && errno == EINTR);
+  return (ret);
+}
+
+static int			wait_status_to_return_value(int			status)
+{
+  if (WIFEXITED(status))
+    return (WEXITSTATUS(status));
+  if (WIFSIGNALED(status))
+    return (128 + WTERMSIG(status));
+  return (status);
+}
+
 // LCOV_EXCL_START
 static void			siguser1(int					x)
 {
@@ -154,8 +174,8 @@ t_technocore_result		start_program_activity(const char		*argv0,
   int				outpipe[2];
   int				opid = getpid();
   pid_t				pid;
-  int				return_value = INT_MAX;
-  int				timeout = 2;
+  int				return_value;
+  int				timeout;
   pid_t				watchdog = -2;
 
   (void)general_cnf;
@@ -184,6 +204,8 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	  return (TC_CRITICAL);
 	}
       shcall[2] = command;
+      return_value = INT_MAX;
+      timeout = 2;
       bunny_configuration_getf(temCnf, &timeout, "Timeout");
       bunny_configuration_getf(temCnf, &return_value, "ReturnValue");
       // Pipe normal pour l'entrée du programme enfant, on a besoin qu'il attende
@@ -287,6 +309,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
       t_bunny_configuration		*cnf;
       int				status;
       int				wstatus = EXIT_SUCCESS;
+      int				program_return_value;
 
       for (int i = 0; bunny_configuration_getf(temCnf, &cnf, "Interactions[%d]", i); ++i)
 	if ((result = interaction(argv0, name, act, cnf, inpipe[1], __stdout, timeout)) == TC_CRITICAL)
@@ -300,14 +323,17 @@ t_technocore_result		start_program_activity(const char		*argv0,
       if (timeout > 0)
 	{
 	  kill(watchdog, SIGTERM);
-	  waitpid(watchdog, &wstatus, 0);
+	  if (waitpid_no_intr(watchdog, &wstatus) == -1)
+	    goto KillProcess;
 	}
       // Le programme, s'il n'est pas mort
-      waitpid(pid, &status, 0);
+      if (waitpid_no_intr(pid, &status) == -1)
+	goto KillProcess;
+      program_return_value = wait_status_to_return_value(status);
   
       // Si on a timeout... (ne fonctionne pas, a priori, vu que interaction
       // est maintenant responsable de cette marque
-      if (wstatus == EXIT_FAILURE)
+      if (WIFEXITED(wstatus) && WEXITSTATUS(wstatus) == EXIT_FAILURE)
 	{ // LCOV_EXCL_START
 	  if (add_exercise_message(act, dict_get_pattern("Timeout"), timeout) == false)
 	    {
@@ -320,9 +346,9 @@ t_technocore_result		start_program_activity(const char		*argv0,
       // Si on a demandé à vérifier la valeur de retour...
       if (return_value != INT_MAX)
 	{
-	  if (return_value != status)
+	  if (return_value != program_return_value)
 	    {
-	      if (add_exercise_message(act, dict_get_pattern("BadReturnValue"), status, return_value) == false)
+	      if (add_exercise_message(act, dict_get_pattern("BadReturnValue"), program_return_value, return_value) == false)
 		{ // LCOV_EXCL_START
 		  add_message(&gl_technocore.error_buffer, "%s: Cannot mark bad return value for program test %s.\n", argv0, name);
 		  return (TC_CRITICAL);

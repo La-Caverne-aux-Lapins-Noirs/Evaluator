@@ -12,15 +12,12 @@
 
   SRC_DIR	=	../src/
   REPORT	?=	./report/
-  COMPILER	?=	gcc
+  COMPILER	?=	bcc
   LIB_TO_TEST	=	LD_LIBRARY_PATH=../
 
   INC_DIR	?=	/usr/include/
 
-  LIB		=	-L$(HOME)/.froot/lib					\
-			-L../ -L./ -levaluator -lcrawler -llapin		\
-			-lsfml-graphics -lsfml-audio -lsfml-window		\
-			-lsfml-system -lavcall -ldl -lm -lusb -lgcov -lstdc++
+  LIB		=	-L../ -L./ -levaluator -lcrawler
   FLAGS		?=	-fPIC -std=c11 -Wno-format-security -Wall -Wextra	\
 			-O0 -Og -g -g3 -ggdb -fprofile-arcs -ftest-coverage	\
 			--coverage -rdynamic -fno-omit-frame-pointer		\

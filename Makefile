@@ -21,9 +21,9 @@
 ## Building details                                                            ##
 #################################################################################
 
-  COMPILER	?=	gcc
-  LINKER	?=	gcc -o
-  TESTLINKER	?=	gcc -shared -fprofile-arcs $(LIB) -o
+  COMPILER	?=	bcc
+  LINKER	?=	bcc -o
+  TESTLINKER	?=	bcc -shared -fprofile-arcs $(LIB) -o
   LIBLINKER	?=	ar rcs
 
   BIN_DIR	?=	/usr/local/bin/
@@ -32,9 +32,7 @@
   ETC_DIR	?=	/opt/technocore/
   LIB_TESTDIR	?=	$(HOME)/.froot/lib/
 
-  LIB		=	-L$(HOME)/.froot/lib/ -llapin -lcrawler -lsfml-graphics \
-			-lsfml-audio -lsfml-window -lsfml-system		\
-			-ldl -lm -lstdc++ -lavcall -lgcov -rdynamic
+  LIB		=	-lcrawler -lgcov -rdynamic
   CONFIG	?=	$(FLAG) -fPIC -std=c11 -Wno-format-security		\
 			-Wall -Wextra
 
