@@ -37,17 +37,31 @@ static int		is_cheater(const char				*func,
   return (bunny_configuration_getf(forb, NULL, "%s", func) ? -1 : 1);
 }
 
+static bool		has_rule_list(t_bunny_configuration		*cnf,
+				      const char			*field)
+{
+  t_bunny_configuration	*node;
+
+  if (cnf == NULL)
+    return (false);
+  if (!bunny_configuration_getf(cnf, &node, "%s", field))
+    return (false);
+  return (bunny_configuration_childrenf(node, ".") != 0);
+}
+
 static bool		is_authorized(const char			*func,
 				      t_bunny_configuration		*gen,
 				      t_bunny_configuration		*exe)
 {
   t_bunny_configuration	*auth;
   t_bunny_configuration	*forb;
+  bool			wl;
   int			a = 0;
   int			b = 0;
 
   // Si il n'y a pas de fonctions autorisé, c'est qu'elles sont toutes interdites.
   // Si il n'y a pas de fonctions interdites, c'est qu'elles sont toutes autorisées.
+  wl = has_rule_list(gen, "AuthorizedFunctions") || has_rule_list(exe, "AuthorizedFunctions");
   if (gen)
     { // LCOV_EXCL_START
       if (!bunny_configuration_getf(gen, &auth, "AuthorizedFunctions"))
@@ -67,11 +81,11 @@ static bool		is_authorized(const char			*func,
       b = is_cheater(func, auth, forb);
     }
 
-  if (a == 0 && b == 0 && auth != NULL && forb == NULL)
-    a = -1;
-  if (b == 0) // Si le local ne sait pas, le global l'emporte.
+  if (b != 0)
+    return (b != -1);
+  if (a != 0)
     return (a != -1);
-  return (b != -1);
+  return (!wl);
 }
 
 t_technocore_result	evaluate_cheat(const char			*argv,
