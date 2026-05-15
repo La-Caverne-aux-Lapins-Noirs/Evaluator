@@ -43,7 +43,7 @@ t_technocore_result	evaluate_object_build(const char		*argv,
   ///////////////////////////////////////////////////////////////////
   // Vérifier qu'il n'y a que deux éléments de pattern %s et %1$s. //
   ///////////////////////////////////////////////////////////////////
-  
+
   char			tmp[2048];
   char			*buffer;
   FILE			*search_pipe;
@@ -98,7 +98,7 @@ t_technocore_result	evaluate_object_build(const char		*argv,
 	  if ((outopt = strstr(&tmp[0], " -o ")) != NULL)
 	    if ((outopt = strstr(outopt, ".c ")) != NULL)
 	      outopt[1] = 'o';
-	  
+
 	  if ((build_pipe = popen(&tmp[0], "r")) == NULL)
 	    { // LCOV_EXCL_START
 	      add_message(&gl_technocore.error_buffer,
@@ -106,7 +106,8 @@ t_technocore_result	evaluate_object_build(const char		*argv,
 	      bunny_delete_split(splitted);
 	      return (TC_CRITICAL);
 	    } // LCOV_EXCL_STOP
-	  red = fread(&tmp[0], 1, sizeof(tmp), build_pipe);
+	  red = fread(&tmp[0], 1, sizeof(tmp) - 1, build_pipe);
+	  tmp[red] = '\0';
 	  if (ferror(build_pipe))
 	    { // LCOV_EXCL_START
 	      add_message(&gl_technocore.error_buffer,
@@ -207,4 +208,3 @@ t_technocore_result	evaluate_object_build(const char		*argv,
 
   return (res);
 }
-

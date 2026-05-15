@@ -105,7 +105,7 @@ static t_technocore_result	prepare_io(const char				*argv0,
   gl_technocore.stderr = dup(gl_technocore.stderr_pipe[1]);
   if (gl_technocore.stdin == -1 || gl_technocore.stdout == -1 || gl_technocore.stderr == -1)
     goto ClosePlaceholders;
-  
+
   res = prepare_jump(argv0, user_handler, tech_func, general_cnf, exe_cnf, act);
 
  ClosePlaceholders:
@@ -158,7 +158,8 @@ static t_technocore_result	prepare_sighandlers(const char			*argv0,
      SIGFPE,
      SIGPIPE,
      SIGBUS,
-     SIGILL
+     SIGILL,
+     SIGABRT
     };
   t_technocore_result		res;
   __sighandler_t		old_handlers[NBRCELL(sigs)];

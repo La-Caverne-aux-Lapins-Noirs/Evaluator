@@ -42,7 +42,8 @@ t_technocore_result	evaluate_full_build(const char			*argv,
 		  build_command, strerror(errno));
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
-  red = fread(&buffer, 1, sizeof(buffer), compile_pipe);
+  red = fread(&buffer, 1, sizeof(buffer) - 1, compile_pipe);
+  buffer[red] = '\0';
   if (ferror(compile_pipe))
     { // LCOV_EXCL_START
       add_message(&gl_technocore.error_buffer,

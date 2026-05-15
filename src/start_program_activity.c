@@ -110,7 +110,7 @@ static t_technocore_result	interaction(const char				*argv0,
 	    }
 	}
       prog_buffer[len] = '\0';
-      
+
       if (ret == -1 && errno == EBADF)
 	{
 	  if (*output != '\0')
@@ -177,6 +177,8 @@ t_technocore_result		start_program_activity(const char		*argv0,
   int				return_value;
   int				timeout;
   pid_t				watchdog = -2;
+  void				(*old_sigusr2)(int) = SIG_ERR;
+  bool				sigusr2_installed = false;
 
   (void)general_cnf;
 
@@ -206,6 +208,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
       shcall[2] = command;
       return_value = INT_MAX;
       timeout = 2;
+      sigusr2_installed = false;
       bunny_configuration_getf(temCnf, &timeout, "Timeout");
       bunny_configuration_getf(temCnf, &return_value, "ReturnValue");
       // Pipe normal pour l'entrée du programme enfant, on a besoin qu'il attende
@@ -227,7 +230,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	     argv0, name, strerror(errno));
 	  goto CloseInputPipe;
 	} // LCOV_EXCL_STOP
-      
+
       if ((pid = fork()) == -1)
 	{ // LCOV_EXCL_START
 	  add_message
@@ -239,7 +242,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
       else if (pid == 0)
 	{ // LCOV_EXCL_START
 	  t_bunny_configuration	*env;
-	  
+
 	  close(inpipe[1]);
 	  close(outpipe[0]);
 	  if (dup2(inpipe[0], STDIN_FILENO) == -1 || dup2(outpipe[1], STDOUT_FILENO) == -1)
@@ -266,7 +269,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
 		  exit(EXIT_FAILURE);
 		}
 	      int			i;
-	      
+
 	      for (i = 0; i < nbr_env; ++i)
 		bunny_configuration_getf(env, &environ[i], "[%d]", i);
 	      environ[i] = NULL;
@@ -277,7 +280,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	} // LCOV_EXCL_STOP
       close(inpipe[0]);
       close(outpipe[1]);
-  
+
       if (timeout > 0)
 	{
 	  // On crée un processus qui va descendre le programme si il met plus de TIMEOUT a finir.
@@ -303,8 +306,9 @@ t_technocore_result		start_program_activity(const char		*argv0,
 
       // Pour éviter d'etre coincé dans read coté evaluator - solution naze a mon avis
       __stdout = outpipe[0];
-      if (signal(SIGUSR2, siguser2) == SIG_ERR)
+      if ((old_sigusr2 = signal(SIGUSR2, siguser2)) == SIG_ERR)
 	goto KillProcess2; // LCOV_EXCL_LINE
+      sigusr2_installed = true;
 
       t_bunny_configuration		*cnf;
       int				status;
@@ -326,11 +330,16 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	  if (waitpid_no_intr(watchdog, &wstatus) == -1)
 	    goto KillProcess;
 	}
+      if (sigusr2_installed)
+	{
+	  signal(SIGUSR2, old_sigusr2);
+	  sigusr2_installed = false;
+	}
       // Le programme, s'il n'est pas mort
       if (waitpid_no_intr(pid, &status) == -1)
 	goto KillProcess;
       program_return_value = wait_status_to_return_value(status);
-  
+
       // Si on a timeout... (ne fonctionne pas, a priori, vu que interaction
       // est maintenant responsable de cette marque
       if (WIFEXITED(wstatus) && WEXITSTATUS(wstatus) == EXIT_FAILURE)
@@ -342,7 +351,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	    }
 	  return (TC_FAILURE);
 	} // LCOV_EXCL_STOP
-  
+
       // Si on a demandé à vérifier la valeur de retour...
       if (return_value != INT_MAX)
 	{
@@ -355,17 +364,24 @@ t_technocore_result		start_program_activity(const char		*argv0,
 		} // LCOV_EXCL_STOP
 	      return (TC_FAILURE);
 	    }
-	} 
+	}
     }
   // Tout est nickel, on s'en va
   return (result);
-  
+
   // LCOV_EXCL_START
   // Les cas d'erreurs.
  KillProcess2:
-  kill(watchdog, SIGTERM);
+  if (sigusr2_installed)
+    {
+      signal(SIGUSR2, old_sigusr2);
+      sigusr2_installed = false;
+    }
+  if (watchdog > 0)
+    kill(watchdog, SIGTERM);
  KillProcess:
-  kill(pid, SIGTERM);
+  if (pid > 0)
+    kill(pid, SIGTERM);
  CloseOutputPipe:
   close(outpipe[0]);
   close(outpipe[1]);
