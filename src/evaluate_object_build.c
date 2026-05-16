@@ -27,7 +27,7 @@ t_technocore_result	evaluate_object_build(const char		*argv,
   // Commpilateur de fichier .c (ou autre) séparément, soit vers des .o soit
   // vers des programmes
   if (!bunny_configuration_getf(exe, &search_command, "SearchCommand"))
-    search_command = "find . -name \"*.c\"";
+    search_command = "find . -name \"*.c\" | sort";
   if (!bunny_configuration_getf(exe, &build_cmd, "BuildCommand"))
     {
       if (!bunny_configuration_getf(exe, &bol, "Link"))

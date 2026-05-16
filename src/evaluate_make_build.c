@@ -235,6 +235,7 @@ t_technocore_result	evaluate_make_build(const char			*argv,
     {
       if (system("make re") != 0)
 	return (report(act, exe, TC_FAILURE, "MakeReFailed", "makefile_invalid_re"));
+      x = sizeof(buffer);
       if (tcpopen("make module", &command[0], &buffer[0], &x, NULL, 0) != 0)
 	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "Fail to list object and product file for make module (make re).\n");
@@ -247,6 +248,7 @@ t_technocore_result	evaluate_make_build(const char			*argv,
 	} // LCOV_EXCL_STOP
       if (system("make re") != 0)
 	return (report(act, exe, TC_FAILURE, "MakeReFailed", "makefile_invalid_re")); // LCOV_EXCL_LINE
+      x = sizeof(buffer);
       if (tcpopen("make module", &command[0], &buffer[0], &x, NULL, 0) != 0)
 	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "Fail to list object and product file for make module (make re2).\n");

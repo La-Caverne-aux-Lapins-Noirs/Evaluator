@@ -13,8 +13,8 @@
 static
 t_technocore_result	retrieve_results(t_technocore_activity		*act,
 					 const char			*str,
-					 char				*buffer,
-					 size_t				l,
+					 char				**buffer,
+					 size_t				*l,
 					 int				*dirty)
 {
   FILE			*pip;
@@ -28,16 +28,16 @@ t_technocore_result	retrieve_results(t_technocore_activity		*act,
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
   errno = 0;
-  while ((cnt = getline(&buffer, &l, pip)) >= 0)
+  while ((cnt = getline(buffer, l, pip)) >= 0)
     {
-      char		*s = strchr(buffer, '\n');
+      char		*s = strchr(*buffer, '\n');
 
       if (s)
 	*s = '\0';
-      if (file_exists(buffer))
+      if (file_exists(*buffer))
 	{
 	  if (add_to_current_report
-	      (act, buffer, "UndesirableFound[%d]", *dirty) == false)
+	      (act, *buffer, "UndesirableFound[%d]", *dirty) == false)
 	    {
 	      pclose(pip);
 	      return (TC_CRITICAL);
@@ -103,14 +103,14 @@ t_technocore_result	evaluate_cleanliness(const char			*argv,
       return (TC_CRITICAL);
       // LCOV_EXCL_STOP
     }
-  str = "find . -name '*.o' -or -name '*~' -or -name '#*' -or -name '*.gcno' -or -name '*.gch'";
-  if (retrieve_results(act, str, buffer, l, &dirty) == TC_CRITICAL)
+  str = "find . \\( -name '*.o' -or -name '*~' -or -name '#*' -or -name '*.gcno' -or -name '*.gch' \\) | sort";
+  if (retrieve_results(act, str, &buffer, &l, &dirty) == TC_CRITICAL)
     {
       free(buffer);
       return (TC_CRITICAL);
     }
-  str = "find . -type f -exec sh -c \"nm {} 2> /dev/null | grep 'T main$' > /dev/null\" ; -print | grep -v \".*\\.o\"";
-  if (retrieve_results(act, str, buffer, l, &dirty) == TC_CRITICAL)
+  str = "find . -type f -exec sh -c 'nm \"$1\" 2> /dev/null | grep \"T main$\" > /dev/null' sh {} \\; -print | grep -v \".*\\.o\" | sort";
+  if (retrieve_results(act, str, &buffer, &l, &dirty) == TC_CRITICAL)
     {
       free(buffer);
       return (TC_CRITICAL);
@@ -121,7 +121,7 @@ t_technocore_result	evaluate_cleanliness(const char			*argv,
   // de casser le systeme ou de tricher (avec un .o forgé, par exemple)
   for (int i = 0; i < dirty; ++i)
     {
-      bunny_configuration_getf(act->current_report, &str, "UnderisableFound[%d]", i);
+      bunny_configuration_getf(act->current_report, &str, "UndesirableFound[%d]", i);
       unlink(str);
     }
 

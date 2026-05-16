@@ -328,7 +328,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	{
 	  kill(watchdog, SIGTERM);
 	  if (waitpid_no_intr(watchdog, &wstatus) == -1)
-	    goto KillProcess;
+	    goto KillProcess2;
 	}
       if (sigusr2_installed)
 	{
