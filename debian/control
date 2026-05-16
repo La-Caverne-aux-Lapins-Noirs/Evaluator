@@ -1,0 +1,44 @@
+Source: evaluator
+Section: devel
+Priority: optional
+Maintainer: Jason Brillante <packaging@technocore.invalid>
+Build-Depends:
+ debhelper-compat (= 13),
+ gcc,
+ g++,
+ make,
+ liblapin-dev,
+ libcrawler-dev,
+ libsfml-dev,
+ libffcall-dev
+Standards-Version: 4.7.4
+Rules-Requires-Root: no
+Homepage: https://github.com/La-Caverne-aux-Lapins-Noirs/Evaluator
+
+Package: evaluator
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ gcc,
+ make,
+ binutils
+Description: TechnoCore evaluation orchestrator
+ Evaluator is the TechnoCore orchestration tool used to run pedagogical
+ correction activities against student submissions. It loads Dabsic activity
+ files, invokes built-in and dynamic correction modules, and produces reports.
+ .
+ This package installs the evaluator executable and its message dictionaries.
+ A minimal default configuration is installed in
+ /etc/technocore/configuration.dab, while packaged static data is installed
+ under /usr/share/technocore/evaluator.
+
+Package: libevaluator-dev
+Section: libdevel
+Architecture: any
+Depends:
+ evaluator (= ${binary:Version}),
+ ${misc:Depends}
+Description: development files for TechnoCore correction modules
+ This package provides the static evaluator support library and public headers
+ used to build TechnoCore correction modules.

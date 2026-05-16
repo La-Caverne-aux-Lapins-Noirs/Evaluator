@@ -1,0 +1,42 @@
+evaluator for Debian
+====================
+
+This package uses the Debian filesystem layout instead of TechnoCore's former
+/opt/technocore layout.
+
+Runtime files installed by this source package:
+
+  /usr/bin/evaluator
+  /usr/share/technocore/evaluator/dictionnary.dab
+  /usr/share/technocore/evaluator/dictionnaries.d/
+
+Runtime paths compiled into the Debian build:
+
+  configuration: /etc/technocore/configuration.dab
+  function modules: /var/lib/technocore/functions/
+
+The evaluator package ships a minimal default configuration in:
+
+  /etc/technocore/configuration.dab
+
+This file is a Debian conffile: local changes are preserved by dpkg during
+upgrades. Private TechnoCore activity data, correction modules and school
+resources may then be deployed separately, for example by Infosphere/Distrans,
+under /var/lib/technocore/.
+
+Development files are installed under:
+
+  /usr/include/technocore/
+  /usr/lib/<multiarch>/libevaluator.a
+
+Correction modules should include the headers with either:
+
+  #include <technocore/technocore_api.h>
+
+or add /usr/include/technocore to their include path if they keep the historical
+#include "technocore_api.h" form.
+
+The upstream unit tests are not run during package builds for now because they
+expect the whole TechnoCore development tree, coverage tooling, and the former
+local ~/.froot layout. They should be moved to autopkgtest or made hermetic
+before enabling them in debian/rules.

@@ -1,0 +1,50 @@
+#!/usr/bin/make -f
+
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+DPKG_EXPORT_BUILDFLAGS = 1
+include /usr/share/dpkg/default.mk
+
+TECHNOCORE_CONFIG = /etc/technocore/configuration.dab
+TECHNOCORE_DATA_DIR = /usr/share/technocore/evaluator
+TECHNOCORE_DICT = $(TECHNOCORE_DATA_DIR)/dictionnary.dab
+TECHNOCORE_FUNCTIONS_DIR = /var/lib/technocore/functions
+
+EVALUATOR_LIBS = -llapin -lcrawler \
+	-lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system \
+	-ldl -lm -lstdc++ -lavcall -rdynamic
+
+MAKE_COMMON = \
+	COMPILER="$(CC)" \
+	LINKER="$(CC) $(LDFLAGS) -o" \
+	LIB="$(EVALUATOR_LIBS)" \
+	PROFILE="$(CPPFLAGS) $(CFLAGS) -DNDEBUG -fPIC" \
+	CONFIG="-std=c11 -Wno-format-security -Wall -Wextra \
+		-DTECHNOCORE_CONFIGURATION=\\\"$(TECHNOCORE_CONFIG)\\\" \
+		-DTECHNOCORE_DICTIONNARY=\\\"$(TECHNOCORE_DICT)\\\" \
+		-DTECHNOCORE_FUNCTIONS_DIR=\\\"$(TECHNOCORE_FUNCTIONS_DIR)\\\""
+
+%:
+	dh $@
+
+override_dh_auto_build:
+	$(MAKE) build $(MAKE_COMMON)
+
+override_dh_auto_test:
+	@echo "Skipping upstream tests during package build; they require the full TechnoCore test environment."
+
+override_dh_auto_install:
+	install -D -m 0755 evaluator debian/evaluator/usr/bin/evaluator
+	install -D -m 0644 dictionnary.dab debian/evaluator$(TECHNOCORE_DICT)
+	install -D -m 0644 debian/configuration.dab debian/evaluator$(TECHNOCORE_CONFIG)
+	mkdir -p debian/evaluator$(TECHNOCORE_DATA_DIR)/dictionnaries.d
+	cp -a dictionnaries.d/. debian/evaluator$(TECHNOCORE_DATA_DIR)/dictionnaries.d/
+	install -D -m 0644 libevaluator.a debian/libevaluator-dev/usr/lib/$(DEB_HOST_MULTIARCH)/libevaluator.a
+	install -D -m 0644 include/technocore_api.h debian/libevaluator-dev/usr/include/technocore/technocore_api.h
+	install -D -m 0644 include/technocore.h debian/libevaluator-dev/usr/include/technocore/technocore.h
+
+override_dh_auto_clean:
+	rm -f evaluator libevaluator.a libevaluator.so errors~
+	find . -name "*.o" -delete
+	find . -name "*.gc*" -delete
+	find . -name "*.info" -delete
+	if [ -d test ]; then $(MAKE) -C test fclean || true; fi

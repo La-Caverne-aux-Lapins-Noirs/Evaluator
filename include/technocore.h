@@ -13,10 +13,13 @@
 #ifdef			NDEBUG
 
 # ifndef		TECHNOCORE_CONFIGURATION
-#  define		TECHNOCORE_CONFIGURATION			"/opt/technocore/configuration.dab"
+#  define		TECHNOCORE_CONFIGURATION			"/etc/technocore/configuration.dab"
 # endif
 # ifndef		TECHNOCORE_DICTIONNARY
-#  define		TECHNOCORE_DICTIONNARY				"/opt/technocore/dictionnary.dab"
+#  define		TECHNOCORE_DICTIONNARY				"/usr/share/technocore/evaluator/dictionnary.dab"
+# endif
+# ifndef		TECHNOCORE_FUNCTIONS_DIR
+#  define		TECHNOCORE_FUNCTIONS_DIR			"/var/lib/technocore/functions"
 # endif
 
 #else

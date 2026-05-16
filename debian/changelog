@@ -1,0 +1,5 @@
+evaluator (0.1.0-1) unstable; urgency=medium
+
+  * Initial Debian packaging for TechnoCore Evaluator.
+
+ -- Jason Brillante <packaging@technocore.invalid>  Sat, 16 May 2026 17:30:00 +0200

@@ -1,0 +1,21 @@
+[*
+** Default TechnoCore Evaluator configuration.
+**
+** This file is intentionally minimal: it lets evaluator start with a sane
+** Debian filesystem layout, while private correction resources may be deployed
+** later by Infosphere/Distrans under /var/lib/technocore.
+*]
+
+RootDir = "/var/lib/technocore/scolaire/"
+School = "blackbunny"
+
+SchoolName = "BlackBunny"
+FunctionPrefix = "bb_"
+FunctionSuffix = ""
+PutChar = FunctionPrefix # "putchar" # FunctionSuffix
+
+[AuthorizedFunctions
+  __errno_location
+  __stack_chk_fail
+  __assert_fail
+]

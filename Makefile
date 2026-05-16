@@ -26,10 +26,12 @@
   TESTLINKER	?=	bcc -shared -fprofile-arcs $(LIB) -o
   LIBLINKER	?=	ar rcs
 
-  BIN_DIR	?=	/usr/local/bin/
-  LIB_DIR	?=	/usr/local/lib/
-  INC_DIR	?=	/usr/local/include/
-  ETC_DIR	?=	/opt/technocore/
+  PREFIX	?=	/usr/local
+  EXEC_PREFIX	?=	$(PREFIX)
+  BIN_DIR	?=	$(EXEC_PREFIX)/bin/
+  LIB_DIR	?=	$(EXEC_PREFIX)/lib/
+  INC_DIR	?=	$(PREFIX)/include/
+  DATA_DIR	?=	$(PREFIX)/share/technocore/evaluator/
   LIB_TESTDIR	?=	$(HOME)/.froot/lib/
 
   LIB		=	-lcrawler -lgcov -rdynamic
@@ -114,9 +116,9 @@ check:			$(TESTLIB)
 			@(cd test/ && $(MAKE) --no-print-directory)
 
 install:		$(LIBBIN) $(NAME) check
-			@$(MKDIR) $(BIN_DIR) $(LIB_DIR) $(ETC_DIR) $(INC_DIR)
+			@$(MKDIR) $(BIN_DIR) $(LIB_DIR) $(DATA_DIR) $(INC_DIR)
 			@$(CP) $(NAME) $(BIN_DIR)
-			@$(CP) $(CNF) $(ETC_DIR)
+			@$(CP) $(CNF) $(DATA_DIR)
 			@$(CP) $(INC) $(INC_DIR)
 			@$(CP) $(LIBBIN) $(LIB_DIR)
 rmlog:
