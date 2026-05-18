@@ -8,6 +8,7 @@
 #ifndef				__TECHNOCORE_API_H__
 # define			__TECHNOCORE_API_H__
 # include			<lapin.h>
+# include			<stdint.h>
 
 # define			NOINLINE				__attribute__ ((noinline))
 
@@ -203,10 +204,99 @@ t_technocore_result		do_mem_diff(t_technocore_activity		*act,
 					    const char				*user,
 					    const char				*ref,
 					    int					len);
+
+typedef struct			s_graphic_diff_configuration
+{
+  int				component_tolerance;
+  int				neighbor_radius;
+  bool				ignore_zero_reference;
+  bool				use_alpha_traps;
+} 				t_graphic_diff_configuration;
+
+typedef struct			s_graphic_diff
+{
+  unsigned int			width;
+  unsigned int			height;
+  size_t			compared_pixels;
+  size_t			matched_pixels;
+  size_t			mismatched_pixels;
+  size_t			trap_pixels;
+} 				t_graphic_diff;
+
+void				init_graphic_diff_configuration(t_graphic_diff_configuration*cnf);
+bool				tc_graphic_compare_buffers(const unsigned int	*user,
+							   const unsigned int	*ref,
+							   unsigned int		width,
+							   unsigned int		height,
+							   const t_graphic_diff_configuration*cnf,
+							   t_graphic_diff	*diff,
+							   unsigned int		*diff_pixels);
+bool				tc_graphic_compare_pixelarray(const t_bunny_pixelarray *user,
+							      const t_bunny_pixelarray *ref,
+							      const t_graphic_diff_configuration *cnf,
+							      t_graphic_diff	*diff,
+							      unsigned int	*diff_pixels);
+bool				tc_graphic_save_bmp24(const char		*file,
+						      const unsigned int	*pixels,
+						      unsigned int		width,
+						      unsigned int		height);
+bool				tc_graphic_save_pixelarray_bmp24(const char				*file,
+								 const t_bunny_pixelarray		*pix);
+t_technocore_result		do_graphic_diff(t_technocore_activity		*act,
+						const char			*name,
+						const t_bunny_pixelarray	*user,
+						const t_bunny_pixelarray	*ref,
+						const t_graphic_diff_configuration *cnf);
+
 void				evaluate_test_efficiency(t_trigger		*trigger,
 							 t_func_eval_mod	*fem,
 							 t_test_func		test,
 							 int			maxbkcase);
+
+
+typedef struct			s_audio_diff_configuration
+{
+  int				amplitude_tolerance;
+  int				neighbor_radius;
+  unsigned int			sample_rate;
+  unsigned int			channels;
+} 				t_audio_diff_configuration;
+
+typedef struct			s_audio_diff
+{
+  unsigned int			sample_rate;
+  unsigned int			channels;
+  size_t			sample_count;
+  size_t			checked_samples;
+  size_t			matched_samples;
+  size_t			mismatched_samples;
+  int				max_delta;
+  double			mean_delta;
+} 				t_audio_diff;
+
+void				init_audio_diff_configuration
+					(t_audio_diff_configuration	*cnf);
+bool				tc_audio_compare_pcm16
+					(const int16_t			*user,
+					 size_t				user_sample_count,
+					 const int16_t			*ref,
+					 size_t				ref_sample_count,
+					 const t_audio_diff_configuration	*cnf,
+					 t_audio_diff			*diff,
+					 int16_t			*diff_samples);
+bool				tc_audio_save_wav_pcm16
+					(const char				*file,
+					 const int16_t			*samples,
+					 size_t				sample_count,
+					 unsigned int			sample_rate,
+					 unsigned int			channels);
+t_technocore_result		do_audio_diff(t_technocore_activity	*act,
+					      const char		*name,
+					      const int16_t		*user,
+					      size_t			user_sample_count,
+					      const int16_t		*ref,
+					      size_t			ref_sample_count,
+					      const t_audio_diff_configuration *cnf);
 
 bool				dict_open(void);
 bool				dict_set_language(const char			*str);

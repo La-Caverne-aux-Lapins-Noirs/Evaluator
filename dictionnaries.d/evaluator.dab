@@ -75,7 +75,11 @@
   ForbiddenFunction = "You have used forbidden function.\n"
   NoForbiddenFunction = "No forbidden fonction were detected.\n"
   StringsAreDifferent = "%s: Strings are different.\nYour string, and then our:\n%s\n%s\n%*c\n"
+  GraphicDimensionsAreDifferent = "%s: Images dimensions are different: got %ux%u, expected %ux%u.\n"
+  PicturesAreDifferent = "%s: Images are different: %zu mismatching pixel(s), %zu trap mismatch(es), %zu checked pixel(s). Diagnostic BMP artefacts were attached to the report.\n"
   BadReturnValue = "Bad return value %d. %d was expected.\n"
+  AudioSampleCountsAreDifferent = "%s: Sound sample counts are different: got %zu sample(s), expected %zu. Diagnostic WAV PCM artefacts were attached to the report.\n"
+  SoundsAreDifferent = "%s: Sounds are different: %zu mismatching sample(s), maximum delta %d, mean delta %.2f over %zu checked sample(s). Diagnostic WAV PCM artefacts were attached to the report.\n"
   TooManyNormError = "Your code contains too many coding rules error. Maximum amount of error points tolerated was %d and %d were acquired for %d mistakes.\n"
 
   NoAnswersFound = "No answers for the current MCQ were found.\n"
@@ -168,7 +172,11 @@
   ForbiddenFunction = "Vous avez utilisé des fonctions interdites.\n"
   NoForbiddenFunction = "Aucune fonction interdite n'a été détécté.\n"
   StringsAreDifferent = "%s: Les chaines de caractères ne correspondent pas.\nVotre chaine, puis la notre:\n%s\n%s\n%*c\n"
+  GraphicDimensionsAreDifferent = "%s: Les dimensions des images ne correspondent pas: %ux%u obtenu, %ux%u attendu.\n"
+  PicturesAreDifferent = "%s: Les images ne correspondent pas: %zu pixel(s) incorrect(s), %zu piège(s) modifié(s), %zu pixel(s) vérifié(s). Les artefacts BMP de diagnostic ont été joints au rapport.\n"
   BadReturnValue = "Mauvaise valeur de retour. %d a été obtenu, %d était attendu.\n"
+  AudioSampleCountsAreDifferent = "%s: Les nombres d'échantillons sonores ne correspondent pas: %zu échantillon(s) obtenu(s), %zu attendu(s). Les artefacts WAV PCM de diagnostic ont été joints au rapport.\n"
+  SoundsAreDifferent = "%s: Les sons ne correspondent pas: %zu échantillon(s) incorrect(s), écart maximal %d, écart moyen %.2f sur %zu échantillon(s) vérifié(s). Les artefacts WAV PCM de diagnostic ont été joints au rapport.\n"
   TooManyNormError = "Votre code contient trop d'infractions au code de rédaction. Le maximum admissible de points d'erreur était de %d et %d points ont été obtenus du fait des %d erreurs ayant été détéctées.\n"
 
   NoAnswersFound = "Aucune réponse n'a été trouvée pour le questionnaire.\n"

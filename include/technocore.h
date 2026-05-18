@@ -30,6 +30,9 @@
 # ifndef		TECHNOCORE_DICTIONNARY
 #  define		TECHNOCORE_DICTIONNARY				"./dictionnary.dab"
 # endif
+# ifndef		TECHNOCORE_FUNCTIONS_DIR
+#  define		TECHNOCORE_FUNCTIONS_DIR			"./"
+# endif
 
 #endif
 
@@ -107,6 +110,11 @@ bool			retrieve_all_files(char				*path,
 					   char				files
 					   [cells][cellsize],
 					   const char			*ext);
+
+void			set_u16le(unsigned char				*buf,
+				  uint16_t				value);
+void			set_u32le(unsigned char				*buf,
+				  uint32_t				value);
 
 bool			add_all_medals(t_technocore_activity		*act,
 				       t_bunny_configuration		*exe);
