@@ -80,6 +80,7 @@
   BadReturnValue = "Bad return value %d. %d was expected.\n"
   AudioSampleCountsAreDifferent = "%s: Sound sample counts are different: got %zu sample(s), expected %zu. Diagnostic WAV PCM artefacts were attached to the report.\n"
   SoundsAreDifferent = "%s: Sounds are different: %zu mismatching sample(s), maximum delta %d, mean delta %.2f over %zu checked sample(s). Diagnostic WAV PCM artefacts were attached to the report.\n"
+  TracesAreDifferent = "%s trace for %s is different at byte %zu. Student trace has %zu byte(s), reference has %zu byte(s). Diagnostic trace artefacts were attached to the report.\n"
   TooManyNormError = "Your code contains too many coding rules error. Maximum amount of error points tolerated was %d and %d were acquired for %d mistakes.\n"
 
   NoAnswersFound = "No answers for the current MCQ were found.\n"
@@ -177,6 +178,7 @@
   BadReturnValue = "Mauvaise valeur de retour. %d a été obtenu, %d était attendu.\n"
   AudioSampleCountsAreDifferent = "%s: Les nombres d'échantillons sonores ne correspondent pas: %zu échantillon(s) obtenu(s), %zu attendu(s). Les artefacts WAV PCM de diagnostic ont été joints au rapport.\n"
   SoundsAreDifferent = "%s: Les sons ne correspondent pas: %zu échantillon(s) incorrect(s), écart maximal %d, écart moyen %.2f sur %zu échantillon(s) vérifié(s). Les artefacts WAV PCM de diagnostic ont été joints au rapport.\n"
+  TracesAreDifferent = "La trace %s de %s diffère à l'octet %zu. La trace étudiante contient %zu octet(s), la référence en contient %zu. Les artefacts de trace ont été joints au rapport.\n"
   TooManyNormError = "Votre code contient trop d'infractions au code de rédaction. Le maximum admissible de points d'erreur était de %d et %d points ont été obtenus du fait des %d erreurs ayant été détéctées.\n"
 
   NoAnswersFound = "Aucune réponse n'a été trouvée pour le questionnaire.\n"

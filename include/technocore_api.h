@@ -298,6 +298,43 @@ t_technocore_result		do_audio_diff(t_technocore_activity	*act,
 					      size_t			ref_sample_count,
 					      const t_audio_diff_configuration *cnf);
 
+
+typedef struct			s_trace_diff_configuration
+{
+  bool				ignore_carriage_return;
+} 				t_trace_diff_configuration;
+
+typedef struct			s_trace_diff
+{
+  size_t			user_length;
+  size_t			ref_length;
+  size_t			first_mismatch;
+} 				t_trace_diff;
+
+void				init_trace_diff_configuration
+					(t_trace_diff_configuration	*cnf);
+bool				tc_trace_compare_text
+					(const char			*user,
+					 const char			*ref,
+					 const t_trace_diff_configuration *cnf,
+					 t_trace_diff			*diff);
+bool				tc_trace_save_text
+					(const char			*file,
+					 const char			*trace);
+t_technocore_result		do_trace_diff(t_technocore_activity	*act,
+					      const char		*type,
+					      const char		*name,
+					      const char		*user,
+					      const char		*ref,
+					      const t_trace_diff_configuration *cnf);
+t_technocore_result		do_vm110n_trace_diff
+					(t_technocore_activity	*act,
+					 const char			*name,
+					 const char			*user,
+					 const char			*ref,
+					 const t_trace_diff_configuration *cnf);
+
+
 bool				dict_open(void);
 bool				dict_set_language(const char			*str);
 const char			*dict_get_pattern(const char			*str);

@@ -206,11 +206,15 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	  return (TC_CRITICAL);
 	}
       shcall[2] = command;
+      t_program_trace		trace;
+
       return_value = INT_MAX;
       timeout = 2;
       sigusr2_installed = false;
       bunny_configuration_getf(temCnf, &timeout, "Timeout");
       bunny_configuration_getf(temCnf, &return_value, "ReturnValue");
+      if ((result = prepare_program_trace(argv0, name, temCnf, &trace)) != TC_SUCCESS)
+	return (result);
       // Pipe normal pour l'entrée du programme enfant, on a besoin qu'il attende
       if (pipe(inpipe) == -1)
 	{ // LCOV_EXCL_START
@@ -255,6 +259,7 @@ t_technocore_result		start_program_activity(const char		*argv0,
 	      if (write(1, "SIGNALFAIL", 10)) {}
 	      exit(EXIT_FAILURE);
 	    }
+	  apply_program_trace_environment(&trace);
 	  if (bunny_configuration_getf(exe_cnf, &env, "Environ") == false)
 	    execvp(shcall[0], (char**)shcall);
 	  else
@@ -364,6 +369,12 @@ t_technocore_result		start_program_activity(const char		*argv0,
 		} // LCOV_EXCL_STOP
 	      return (TC_FAILURE);
 	    }
+	}
+      if (result == TC_SUCCESS && trace.enabled)
+	{
+	  result = check_program_trace(act, name, &trace);
+	  if (result != TC_SUCCESS)
+	    return (result);
 	}
     }
   // Tout est nickel, on s'en va

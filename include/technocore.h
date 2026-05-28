@@ -8,6 +8,7 @@
 #ifndef			__TECHNOCORE_H__
 # define		__TECHNOCORE_H__
 # include		<stdbool.h>
+# include		<limits.h>
 # include		"technocore_api.h"
 
 #ifdef			NDEBUG
@@ -123,6 +124,29 @@ typedef t_technocore_result t_builtin_module(const char			*argv,
 					     t_bunny_configuration	*general_cnf,
 					     t_bunny_configuration	*local_cnf,
 					     t_technocore_activity	*act);
+
+
+typedef struct		s_program_trace
+{
+  bool			enabled;
+  char			type[32];
+  char			helper_dir[PATH_MAX];
+  char			trace_file[PATH_MAX];
+  char			scenario_file[PATH_MAX];
+  char			max_writes[32];
+  const char		*expected;
+} 			t_program_trace;
+
+t_technocore_result	prepare_program_trace(const char		*argv0,
+				      const char		*name,
+				      t_bunny_configuration *program,
+				      t_program_trace	*trace);
+void			apply_program_trace_environment
+				      (const t_program_trace	*trace);
+t_technocore_result	check_program_trace(t_technocore_activity	*act,
+				    const char			*name,
+				    const t_program_trace	*trace);
+
 
 t_builtin_module	evaluate_cleanliness;
 t_builtin_module	evaluate_construction;
