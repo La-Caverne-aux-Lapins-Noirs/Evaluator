@@ -50,6 +50,8 @@ t_technocore_result		start_builtin_activity(const char		*argv0,
     return (execute_move(argv0, general_cnf, exe, act));
   if (strcmp(module, "Norm") == 0)
     return (evaluate_file_c_norm(argv0, general_cnf, exe, act));
+  if (strcmp(module, "Macro") == 0)
+    return (evaluate_macro(argv0, general_cnf, exe, act));
   if (strcmp(module, "Unset") == 0)
     {
       t_bunny_configuration	*vcnf;

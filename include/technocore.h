@@ -9,6 +9,9 @@
 # define		__TECHNOCORE_H__
 # include		<stdbool.h>
 # include		<limits.h>
+# ifndef		PATH_MAX
+#  define		PATH_MAX					4096
+# endif
 # include		"technocore_api.h"
 
 #ifdef			NDEBUG
@@ -156,6 +159,7 @@ t_builtin_module	execute_command;
 t_builtin_module	execute_move;
 t_builtin_module	evaluate_cheat;
 t_builtin_module	evaluate_file_c_norm;
+t_builtin_module	evaluate_macro;
 
 // Sous fonction de evaluate_construction
 t_builtin_module	evaluate_make_build;

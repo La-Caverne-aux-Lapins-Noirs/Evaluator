@@ -93,6 +93,14 @@
   MCQSuccess = "Success. %d points acquired. Minimum is %d. Maximum is %d.\n"
   TraceFail = "Cannot write traces for exercise %s.\n"
   ReadFail = "Failed to read from temporary %s pipe for %s.\n"
+  MissingMacroHeader = "No student header was configured for the macro tests.\n"
+  MissingMacroTests = "No macro test was configured.\n"
+  MacroGenerationFailed = "The macro test source file could not be generated.\n"
+  MacroCompileFail = "The macro test source file does not compile.\n"
+  MacroRunFail = "At least one macro test failed.\n"
+  MacroEarlyExit = "The macro test program ended successfully before the test harness reached its final success marker.\n"
+  MacroGuardFail = "The macro test program did not reach the expected guarded final state.\n"
+  MacroTestsOk = "All macro tests passed.\n"
 ]
 
 
@@ -191,5 +199,13 @@
   MCQSuccess = "Succès. %d points acquis. Le minimum était de %d. Le maximum de %d.\n\n"
   TraceFail = "Impossible d'écrire les traces pour l'exercice %s.\n"
   ReadFail = "Echec de la lecture sur le tube temporaire %s pour %s.\n"
+  MissingMacroHeader = "Aucun en-tête étudiant n'a été configuré pour les tests de macros.\n"
+  MissingMacroTests = "Aucun test de macro n'a été configuré.\n"
+  MacroGenerationFailed = "Le fichier source de test des macros n'a pas pu être généré.\n"
+  MacroCompileFail = "Le fichier source de test des macros ne compile pas.\n"
+  MacroRunFail = "Au moins un test de macro a échoué.\n"
+  MacroEarlyExit = "Le programme de test des macros s'est terminé avec succès avant que la moulinette atteigne son marqueur final de succès.\n"
+  MacroGuardFail = "Le programme de test des macros n'a pas atteint l'état final protégé attendu.\n"
+  MacroTestsOk = "Tous les tests de macros ont réussi.\n"
 ]
 

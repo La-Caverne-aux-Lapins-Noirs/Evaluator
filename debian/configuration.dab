@@ -12,6 +12,8 @@ School = "blackbunny"
 SchoolName = "BlackBunny"
 FunctionPrefix = "bb_"
 FunctionSuffix = ""
+MacroPrefix = "BB_"
+MacroSuffix = ""
 PutChar = FunctionPrefix # "putchar" # FunctionSuffix
 
 [AuthorizedFunctions

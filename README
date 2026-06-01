@@ -129,6 +129,56 @@ Module d'hygiène
  - Products (string ou tableau de string) indiquant quels sont censés être les produits de compilation du projet,
    et qui sont donc censé être absent...
 
+Test de macros
+==============
+
+ Le module "Macro" de type "Builtin" permet de tester des macros C déclarées dans un en-tête étudiant.
+ Il ne charge pas de bibliothèque dynamique: Evaluator génère un fichier C temporaire, inclut l'en-tête
+ configuré, compile ce fichier, puis exécute le programme produit.
+
+ Exemple minimal:
+
+ Type = "Builtin"
+ Module = "Macro"
+ Header = "efmacros.h"
+ MacroName = "EFSQUARE"
+ {Tests
+   [
+     Name = "EFSQUARE(3)"
+     Expression = "EFSQUARE(3)"
+     Expected = "9"
+   ]
+   [
+     Name = "EFSQUARE(-4)"
+     Code = "if (EFSQUARE(-4) != 16) return (1);"
+   ]
+ }
+
+ Champs disponibles:
+ - Header ou Headers: chaîne ou tableau de chaînes. Les en-têtes à inclure. Les valeurs commençant par '<'
+   sont incluses telles quelles, les autres sont incluses avec des guillemets.
+ - MacroName ou MacroNames: chaîne ou tableau de chaînes optionnel. Chaque nom produit un #ifndef dédié
+   afin de signaler explicitement l'absence de macro.
+ - Prelude: code C optionnel placé après les inclusions et avant les fonctions de test.
+ - Tests: tableau de tests. Chaque test contient soit Code, soit le couple Expression / Expected.
+ - SourceName: nom du fichier C généré. Par défaut: ".technocore_macro_test.c".
+ - ProductName: nom du programme généré. Par défaut: ".technocore_macro_test".
+ - BuildCommand: commande de compilation optionnelle. Par défaut, gcc est appelé en C11 avec -Wall -Wextra
+   et les chemins d'inclusion locaux. Si elle est fournie, les deux premiers %s reçoivent
+   SourceName puis ProductName.
+ - RunCommand: commande d'exécution optionnelle. Si elle est fournie, le premier %s reçoit ProductName.
+ - Timeout: délai d'exécution en secondes. Par défaut: 2.
+ - KeepFiles: conserve SourceName et ProductName après le test. Par défaut: false.
+
+ Le succès de l'exécution ne dépend pas seulement du code retour du programme généré: Evaluator attend
+ aussi un marqueur final contenant l'état final protégé atteint après tous les tests. Cet état est
+ porté par une fonction static générée localement, évolue après chaque réussite, et sa valeur finale
+ attendue est invalidée par une sortie prématurée ou par un appel surnuméraire. Cela évite notamment
+ qu'une macro appelle exit(0), _Exit(0), abort() ou return 0 pour court-circuiter la moulinette.
+
+ Les blocs Code doivent donc signaler l'échec avec return (1) et laisser le flot tomber à la fin du
+ bloc en cas de succès. Un return (0) placé dans Code est traité comme une sortie prématurée du test.
+
 Contenu du fichier authorized.dab
 =================================
 
