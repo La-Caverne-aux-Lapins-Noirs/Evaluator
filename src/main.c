@@ -27,7 +27,7 @@ int			main(int		argc,
   bunny_set_log_filter("syntax");
   if (dict_open() == false)
     {
-      fprintf(stderr, "%s: Impossible to open dictionnary file.\n", argv[0]);
+      fprintf(stderr, "%s: Impossible to open dictionnary file %s.\n", argv[0], TECHNOCORE_DICTIONNARY);
       return (EXIT_FAILURE);
     }
 
@@ -79,6 +79,11 @@ int			main(int		argc,
 	  fprintf(stderr, "%s: Cannot open configuration file for %s.\n", *argv, argv[i]);
 	  return (EXIT_FAILURE);
 	}
+
+      const char	*root_dir;
+
+      if (bunny_configuration_getf(cnf, &root_dir, "RootDir"))
+	bunny_configuration_push_path(root_dir);
       if ((cnf = bunny_open_configuration("./activity.dab", cnf)) == NULL)
 	{
 	  fprintf(stderr, "%s: Cannot open activity file for %s.\n", *argv, argv[i]);

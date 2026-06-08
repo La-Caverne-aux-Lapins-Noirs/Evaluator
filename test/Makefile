@@ -78,6 +78,8 @@ rmlog:
 clean:
 			@find . -name "*.gc*" -delete
 			@find . -name "*.info" -delete
+			@find src/res/make -type d \( -name .bin -o -name .lib -o -name .inc \) -prune -exec rm -rf {} +
+			@find src/res/make -path "*/tests/report" -type d -prune -exec rm -rf {} +
 			@$(RM) $(OBJ)
 fclean:			clean
 			@$(RM) $(REPORT)

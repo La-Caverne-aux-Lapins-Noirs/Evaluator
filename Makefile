@@ -26,12 +26,15 @@
   TESTLINKER	?=	bcc -shared -fprofile-arcs $(LIB) -o
   LIBLINKER	?=	ar rcs
 
-  PREFIX	?=	/usr/local
+  PREFIX	?=	/usr
   EXEC_PREFIX	?=	$(PREFIX)
   BIN_DIR	?=	$(EXEC_PREFIX)/bin/
   LIB_DIR	?=	$(EXEC_PREFIX)/lib/
   INC_DIR	?=	$(PREFIX)/include/
+  ETC_DIR	?=	/etc/technocore/
   DATA_DIR	?=	$(PREFIX)/share/technocore/evaluator/
+  FUNCTIONS_DIR	?=	/var/lib/technocore/functions/
+  SCOLAIRE_DIR	?=	/var/lib/technocore/scolaire/
   LIB_TESTDIR	?=	$(HOME)/.froot/lib/
 
   LIB		=	-lcrawler -lgcov -rdynamic
@@ -42,17 +45,23 @@
 			--coverage -fno-omit-frame-pointer -fno-align-functions	\
 			-fno-align-loops
   TEST		=	$(DEBUG) -DNDEBUG
-  PRODUCTION	=	-O3 -ffast-math -march=native
+  PRODUCTION	=	-O3 -ffast-math -march=native -DNDEBUG
 
   ifeq ($(RELEASE), 2)
     MODE_NAME	=	"Build mode: release"
-    PROFILE	=	$(DEBUG)
+    PROFILE	=	$(PRODUCTION)
   else ifeq ($(RELEASE), 1)
     MODE_NAME	=	"Build mode: test"
     PROFILE	=	$(TEST)
   else
     MODE_NAME	=	"Build mode: debug"
     PROFILE	=	$(DEBUG)
+  endif
+
+  ifeq ($(RELEASE), 2)
+    CONFIG	+=	-DTECHNOCORE_CONFIGURATION=\"$(ETC_DIR)configuration.dab\" \
+			-DTECHNOCORE_DICTIONNARY=\"$(DATA_DIR)dictionnary.dab\" \
+			-DTECHNOCORE_ROBOTS_DIR=\"$(FUNCTIONS_DIR)\"
   endif
 
   CP		=	cp -r
@@ -115,12 +124,20 @@ $(LIBBIN):		$(OBJ)
 check:			$(TESTLIB)
 			@(cd test/ && $(MAKE) --no-print-directory)
 
-install:		$(LIBBIN) $(NAME) check
-			@$(MKDIR) $(BIN_DIR) $(LIB_DIR) $(DATA_DIR) $(INC_DIR)
-			@$(CP) $(NAME) $(BIN_DIR)
-			@$(CP) $(CNF) $(DATA_DIR)
-			@$(CP) $(INC) $(INC_DIR)
-			@$(CP) $(LIBBIN) $(LIB_DIR)
+install:
+			@$(MAKE) --no-print-directory fclean
+			@$(MAKE) --no-print-directory RELEASE=2 build
+			@$(MKDIR) $(BIN_DIR) $(LIB_DIR) $(DATA_DIR) \
+			 $(DATA_DIR)dictionnaries.d $(INC_DIR) $(ETC_DIR) \
+			 $(FUNCTIONS_DIR) $(SCOLAIRE_DIR)
+			@install -m 0755 $(NAME) $(BIN_DIR)$(NAME)
+			@install -m 0644 dictionnary.dab $(DATA_DIR)dictionnary.dab
+			@$(CP) dictionnaries.d/. $(DATA_DIR)dictionnaries.d/
+			@test -f $(ETC_DIR)configuration.dab || \
+			 install -m 0644 debian/configuration.dab $(ETC_DIR)configuration.dab
+			@install -m 0644 $(INC) $(INC_DIR)technocore_api.h
+			@install -m 0644 include/technocore.h $(INC_DIR)technocore.h
+			@install -m 0644 $(LIBBIN) $(LIB_DIR)$(LIBBIN)
 rmlog:
 			@$(RM) $(LOGFILE)
 clean:
@@ -134,7 +151,7 @@ fclean:			clean
 				-or -name "*.a" -delete				\
 				-or -name "*.o" -delete				\
 				-or -name "*~" -delete
-			@$(RM) $(LIB_DIR)/$(LIBBIN)
+			@$(RM) $(LIBBIN)
 			@$(RM) $(NAME) &&					\
 			 $(ECHO) $(GREEN) "Program deleted!" $(DEFLT) ||	\
 			 $(ECHO) $(RED) "Error in fclean rule!" $(DEFLT)

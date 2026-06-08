@@ -22,8 +22,8 @@
 # ifndef		TECHNOCORE_DICTIONNARY
 #  define		TECHNOCORE_DICTIONNARY				"/usr/share/technocore/evaluator/dictionnary.dab"
 # endif
-# ifndef		TECHNOCORE_FUNCTIONS_DIR
-#  define		TECHNOCORE_FUNCTIONS_DIR			"/var/lib/technocore/functions"
+# ifndef		TECHNOCORE_ROBOTS_DIR
+#  define		TECHNOCORE_ROBOTS_DIR				"/var/lib/technocore/robots"
 # endif
 
 #else
@@ -34,8 +34,8 @@
 # ifndef		TECHNOCORE_DICTIONNARY
 #  define		TECHNOCORE_DICTIONNARY				"./dictionnary.dab"
 # endif
-# ifndef		TECHNOCORE_FUNCTIONS_DIR
-#  define		TECHNOCORE_FUNCTIONS_DIR			"./"
+# ifndef		TECHNOCORE_ROBOTS_DIR
+#  define		TECHNOCORE_ROBOTS_DIR				"./"
 # endif
 
 #endif

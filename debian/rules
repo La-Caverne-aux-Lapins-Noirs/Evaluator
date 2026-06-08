@@ -7,7 +7,7 @@ include /usr/share/dpkg/default.mk
 TECHNOCORE_CONFIG = /etc/technocore/configuration.dab
 TECHNOCORE_DATA_DIR = /usr/share/technocore/evaluator
 TECHNOCORE_DICT = $(TECHNOCORE_DATA_DIR)/dictionnary.dab
-TECHNOCORE_FUNCTIONS_DIR = /var/lib/technocore/functions
+TECHNOCORE_ROBOTS_DIR = /var/lib/technocore/robots
 
 EVALUATOR_LIBS = -llapin -lcrawler \
 	-lsfml-graphics -lsfml-audio -lsfml-window -lsfml-system \
@@ -21,7 +21,7 @@ MAKE_COMMON = \
 	CONFIG="-std=c11 -Wno-format-security -Wall -Wextra \
 		-DTECHNOCORE_CONFIGURATION=\\\"$(TECHNOCORE_CONFIG)\\\" \
 		-DTECHNOCORE_DICTIONNARY=\\\"$(TECHNOCORE_DICT)\\\" \
-		-DTECHNOCORE_FUNCTIONS_DIR=\\\"$(TECHNOCORE_FUNCTIONS_DIR)\\\""
+		-DTECHNOCORE_ROBOTS_DIR=\\\"$(TECHNOCORE_ROBOTS_DIR)\\\""
 
 %:
 	dh $@
