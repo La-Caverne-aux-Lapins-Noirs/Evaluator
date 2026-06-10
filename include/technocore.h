@@ -23,7 +23,7 @@
 #  define		TECHNOCORE_DICTIONNARY				"/usr/share/technocore/evaluator/dictionnary.dab"
 # endif
 # ifndef		TECHNOCORE_ROBOTS_DIR
-#  define		TECHNOCORE_ROBOTS_DIR				"/var/lib/technocore/robots"
+#  define		TECHNOCORE_ROBOTS_DIR				"/var/lib/technocore/"
 # endif
 
 #else

@@ -6,7 +6,7 @@
 ** later by Infosphere/Distrans under /var/lib/technocore.
 *]
 
-RootDir = "/var/lib/technocore/scolaire/"
+RootDir = "/var/lib/technocore/"
 School = "blackbunny"
 
 SchoolName = "BlackBunny"
@@ -21,3 +21,4 @@ PutChar = FunctionPrefix # "putchar" # FunctionSuffix
   __stack_chk_fail
   __assert_fail
 ]
+

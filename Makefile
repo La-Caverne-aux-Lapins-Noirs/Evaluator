@@ -15,7 +15,7 @@
   NAME		=	evaluator
   TESTLIB	=	libevaluator.so
   LIBBIN	=	libevaluator.a
-  RELEASE	=	0
+  RELEASE	=	1
 
 #################################################################################
 ## Building details                                                            ##
@@ -33,7 +33,7 @@
   INC_DIR	?=	$(PREFIX)/include/
   ETC_DIR	?=	/etc/technocore/
   DATA_DIR	?=	$(PREFIX)/share/technocore/evaluator/
-  FUNCTIONS_DIR	?=	/var/lib/technocore/functions/
+  FUNCTIONS_DIR	?=	/var/lib/technocore/
   SCOLAIRE_DIR	?=	/var/lib/technocore/scolaire/
   LIB_TESTDIR	?=	$(HOME)/.froot/lib/
 
@@ -56,12 +56,6 @@
   else
     MODE_NAME	=	"Build mode: debug"
     PROFILE	=	$(DEBUG)
-  endif
-
-  ifeq ($(RELEASE), 2)
-    CONFIG	+=	-DTECHNOCORE_CONFIGURATION=\"$(ETC_DIR)configuration.dab\" \
-			-DTECHNOCORE_DICTIONNARY=\"$(DATA_DIR)dictionnary.dab\" \
-			-DTECHNOCORE_ROBOTS_DIR=\"$(FUNCTIONS_DIR)\"
   endif
 
   CP		=	cp -r
@@ -126,7 +120,7 @@ check:			$(TESTLIB)
 
 install:
 			@$(MAKE) --no-print-directory fclean
-			@$(MAKE) --no-print-directory RELEASE=2 build
+			@$(MAKE) --no-print-directory build
 			@$(MKDIR) $(BIN_DIR) $(LIB_DIR) $(DATA_DIR) \
 			 $(DATA_DIR)dictionnaries.d $(INC_DIR) $(ETC_DIR) \
 			 $(FUNCTIONS_DIR) $(SCOLAIRE_DIR)
