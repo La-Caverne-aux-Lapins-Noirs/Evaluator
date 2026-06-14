@@ -19,7 +19,8 @@ bool			dict_open(void)
 {
   bunny_set_error_descriptor(2);
   if ((gl_dictionnary = bunny_open_configuration(TECHNOCORE_DICTIONNARY, NULL)) == NULL)
-    return (false);
+    if ((gl_dictionnary = bunny_open_configuration("./dictionnary.dab", NULL)) == NULL)
+      return (false);
   bunny_set_error_descriptor(-1);
   atexit(dict_close);
   return (true);

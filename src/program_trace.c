@@ -13,6 +13,7 @@
 #include			<string.h>
 #include			<sys/stat.h>
 #include			<unistd.h>
+#include			<assert.h>
 #include			"technocore.h"
 
 static const char		lapin_header[] =
@@ -257,9 +258,9 @@ static t_technocore_result	prepare_vm110n_trace
   bunny_configuration_getf(node, &scenario, "Scenario");
   bunny_configuration_getf(node, &max_writes, "MaxWrites");
   snprintf(trace->type, sizeof(trace->type), "VM110N");
-  snprintf(trace->helper_dir, sizeof(trace->helper_dir), ".technocore_vm110n");
-  snprintf(trace->trace_file, sizeof(trace->trace_file), "%s/trace.txt", trace->helper_dir);
-  snprintf(trace->scenario_file, sizeof(trace->scenario_file), "%s/scenario.txt", trace->helper_dir);
+  assert(snprintf(trace->helper_dir, sizeof(trace->helper_dir), ".technocore_vm110n") < sizeof(trace->helper_dir) - 1);
+  assert(snprintf(trace->trace_file, sizeof(trace->trace_file), "%s/trace.txt", trace->helper_dir) < sizeof(trace->helper_dir) - 1);
+  assert(snprintf(trace->scenario_file, sizeof(trace->scenario_file), "%s/scenario.txt", trace->helper_dir) < sizeof(trace->scenario_file) - 1);
   snprintf(trace->max_writes, sizeof(trace->max_writes), "%d", max_writes);
   if (mkdir(trace->helper_dir, 0755) == -1 && errno != EEXIST)
     {
@@ -268,10 +269,10 @@ static t_technocore_result	prepare_vm110n_trace
 		  argv0, name, strerror(errno));
       return (TC_CRITICAL);
     }
-  snprintf(path, sizeof(path), "%s/lapin.h", trace->helper_dir);
+  assert(snprintf(path, sizeof(path), "%s/lapin.h", trace->helper_dir) < sizeof(path) - 1);
   if (write_text_file(path, lapin_header) == false)
     goto WriteFail;
-  snprintf(path, sizeof(path), "%s/vm110n.c", trace->helper_dir);
+  assert(snprintf(path, sizeof(path), "%s/vm110n.c", trace->helper_dir) < sizeof(path) - 1);
   if (write_text_file(path, vm110n_runtime) == false ||
       write_text_file(trace->scenario_file, scenario) == false ||
       write_text_file(trace->trace_file, "") == false)
