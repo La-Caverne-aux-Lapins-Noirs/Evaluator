@@ -16,7 +16,7 @@
 #define				PAGT(label, a, ...)		\
   do { fprintf(stderr, a, ##__VA_ARGS__); goto label; } while (0)
 
-jmp_buf				gl_before_test;
+sigjmp_buf				gl_before_test;
 
 static t_technocore_result	prepare_jump(const char				*argv0,
 					     void				*user_handler,
@@ -34,7 +34,7 @@ static t_technocore_result	prepare_jump(const char				*argv0,
   bunny_configuration_getf(exe_cnf, &del, "Timeout");
 
   alarm(abs(del));
-  if ((err = setjmp(gl_before_test)) == 0)
+  if ((err = sigsetjmp(gl_before_test, 1)) == 0)
     res = tech_func(user_handler, general_cnf, exe_cnf, act);
   else
     {
@@ -162,21 +162,25 @@ static t_technocore_result	prepare_sighandlers(const char			*argv0,
      SIGABRT
     };
   t_technocore_result		res;
-  __sighandler_t		old_handlers[NBRCELL(sigs)];
+  struct sigaction		act_sig;
+  struct sigaction		old_handlers[NBRCELL(sigs)];
 
+  memset(&act_sig, 0, sizeof(act_sig));
+  act_sig.sa_handler = sighandler;
+  sigemptyset(&act_sig.sa_mask);
   for (int i = 0; i < (int)NBRCELL(old_handlers); ++i)
-    if ((old_handlers[i] = signal(sigs[i], sighandler)) == SIG_ERR)
+    if (sigaction(sigs[i], &act_sig, &old_handlers[i]) == -1)
       { // LCOV_EXCL_START
 	fprintf(stderr, "%s: Cannot set handler for signal %d.\n", argv0, sigs[i]);
 	for (i -= 1; i >= 0; --i)
-	  signal(sigs[i], old_handlers[i]);
+	  sigaction(sigs[i], &old_handlers[i], NULL);
 	return (TC_FAILURE);
       } // LCOV_EXCL_STOP
 
   res = prepare_io(argv0, user_handler, tech_func, general_cnf, exe_cnf, act);
 
   for (int i = 0; i < (int)NBRCELL(old_handlers); ++i)
-    signal(sigs[i], old_handlers[i]);
+    sigaction(sigs[i], &old_handlers[i], NULL);
   return (res);
 }
 

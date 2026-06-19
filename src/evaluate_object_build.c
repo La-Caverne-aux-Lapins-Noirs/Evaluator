@@ -49,12 +49,14 @@ t_technocore_result	evaluate_object_build(const char		*argv,
   FILE			*search_pipe;
   int			warning;
   int			error;
+  int			found;
   int			cnt;
   size_t		l;
 
   l = 8128;
   warning = 0;
   error = 0;
+  found = 0;
   if ((buffer = malloc(l)) == NULL)
     { // LCOV_EXCL_START
       add_message(&gl_technocore.error_buffer,
@@ -89,6 +91,7 @@ t_technocore_result	evaluate_object_build(const char		*argv,
       // On parcoure les fichiers trouvé sur la ligne
       for (size_t x = 0; splitted[x]; ++x)
 	{
+	  found += 1;
 	  FILE		*build_pipe;
 	  char		*outopt;
 	  size_t	red;
@@ -157,7 +160,13 @@ t_technocore_result	evaluate_object_build(const char		*argv,
   const char		*med;
 
   res = TC_SUCCESS;
-  if (warning == 0 && error == 0)
+  if (found == 0)
+    {
+      res = TC_FAILURE;
+      med = "not_build";
+      snprintf(&tmp[0], sizeof(tmp), "No source file was found by object build search command '%s'.\n", search_command);
+    }
+  else if (warning == 0 && error == 0)
     {
       snprintf(&tmp[0], sizeof(tmp), dict_get_pattern("ObjectBuildOk"));
       bunny_delete_node(act->current_report, "FailedObject");

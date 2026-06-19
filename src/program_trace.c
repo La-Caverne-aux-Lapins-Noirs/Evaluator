@@ -235,6 +235,61 @@ static bool			read_text_file
   return (false);
 }
 
+static t_technocore_result	set_vm110n_path
+(const char			*argv0,
+ const char			*name,
+ char				*buffer,
+ size_t				size,
+ const char			*format,
+ const char			*arg)
+{
+  int				ret;
+
+  ret = snprintf(buffer, size, format, arg);
+  if (ret < 0 || (size_t)ret >= size)
+    {
+      add_message(&gl_technocore.error_buffer,
+		  "%s: VM110N helper path is too long for program test %s.\n",
+		  argv0, name);
+      return (TC_CRITICAL);
+    }
+  return (TC_SUCCESS);
+}
+
+static t_technocore_result	make_vm110n_helper_dir
+(const char			*argv0,
+ const char			*name,
+ t_program_trace		*trace)
+{
+  const char			*tmpdir;
+  char				template[PATH_MAX];
+  char				*created;
+  int				ret;
+
+  tmpdir = getenv("TMPDIR");
+  if (tmpdir == NULL || tmpdir[0] == '\0')
+    tmpdir = "/tmp";
+  ret = snprintf(template, sizeof(template),
+		 "%s/technocore-vm110n-%ld-XXXXXX", tmpdir, (long)getpid());
+  if (ret < 0 || (size_t)ret >= sizeof(template))
+    {
+      add_message(&gl_technocore.error_buffer,
+		  "%s: VM110N temporary directory path is too long for program test %s.\n",
+		  argv0, name);
+      return (TC_CRITICAL);
+    }
+  created = mkdtemp(template);
+  if (created == NULL)
+    {
+      add_message(&gl_technocore.error_buffer,
+		  "%s: Cannot create VM110N temporary helper directory for %s: %s.\n",
+		  argv0, name, strerror(errno));
+      return (TC_CRITICAL);
+    }
+  return (set_vm110n_path(argv0, name, trace->helper_dir,
+				  sizeof(trace->helper_dir), "%s", created));
+}
+
 static t_technocore_result	prepare_vm110n_trace
 (const char			*argv0,
  const char			*name,
@@ -257,22 +312,36 @@ static t_technocore_result	prepare_vm110n_trace
   max_writes = 0;
   bunny_configuration_getf(node, &scenario, "Scenario");
   bunny_configuration_getf(node, &max_writes, "MaxWrites");
-  snprintf(trace->type, sizeof(trace->type), "VM110N");
-  assert(snprintf(trace->helper_dir, sizeof(trace->helper_dir), ".technocore_vm110n") < sizeof(trace->helper_dir) - 1);
-  assert(snprintf(trace->trace_file, sizeof(trace->trace_file), "%s/trace.txt", trace->helper_dir) < sizeof(trace->helper_dir) - 1);
-  assert(snprintf(trace->scenario_file, sizeof(trace->scenario_file), "%s/scenario.txt", trace->helper_dir) < sizeof(trace->scenario_file) - 1);
+  if (set_vm110n_path(argv0, name, trace->type, sizeof(trace->type),
+		      "%s", "VM110N") != TC_SUCCESS ||
+      set_vm110n_path(argv0, name, trace->max_writes, sizeof(trace->max_writes),
+		      "%s", "") != TC_SUCCESS)
+    return (TC_CRITICAL);
   snprintf(trace->max_writes, sizeof(trace->max_writes), "%d", max_writes);
-  if (mkdir(trace->helper_dir, 0755) == -1 && errno != EEXIST)
+  if (make_vm110n_helper_dir(argv0, name, trace) != TC_SUCCESS)
+    return (TC_CRITICAL);
+  if (set_vm110n_path(argv0, name, trace->trace_file, sizeof(trace->trace_file),
+		      "%s/trace.txt", trace->helper_dir) != TC_SUCCESS ||
+      set_vm110n_path(argv0, name, trace->scenario_file, sizeof(trace->scenario_file),
+		      "%s/scenario.txt", trace->helper_dir) != TC_SUCCESS)
     {
-      add_message(&gl_technocore.error_buffer,
-		  "%s: Cannot create VM110N helper directory for %s: %s.\n",
-		  argv0, name, strerror(errno));
+      cleanup_program_trace(trace);
       return (TC_CRITICAL);
     }
-  assert(snprintf(path, sizeof(path), "%s/lapin.h", trace->helper_dir) < sizeof(path) - 1);
+  if (set_vm110n_path(argv0, name, path, sizeof(path),
+		      "%s/lapin.h", trace->helper_dir) != TC_SUCCESS)
+    {
+      cleanup_program_trace(trace);
+      return (TC_CRITICAL);
+    }
   if (write_text_file(path, lapin_header) == false)
     goto WriteFail;
-  assert(snprintf(path, sizeof(path), "%s/vm110n.c", trace->helper_dir) < sizeof(path) - 1);
+  if (set_vm110n_path(argv0, name, path, sizeof(path),
+		      "%s/vm110n.c", trace->helper_dir) != TC_SUCCESS)
+    {
+      cleanup_program_trace(trace);
+      return (TC_CRITICAL);
+    }
   if (write_text_file(path, vm110n_runtime) == false ||
       write_text_file(trace->scenario_file, scenario) == false ||
       write_text_file(trace->trace_file, "") == false)
@@ -284,7 +353,46 @@ static t_technocore_result	prepare_vm110n_trace
   add_message(&gl_technocore.error_buffer,
 	      "%s: Cannot write VM110N helper files for %s: %s.\n",
 	      argv0, name, strerror(errno));
+  cleanup_program_trace(trace);
   return (TC_CRITICAL);
+}
+
+static void			unlink_vm110n_path(const char		*path)
+{
+  if (path != NULL && path[0] != '\0')
+    unlink(path);
+}
+
+static void			unlink_vm110n_helper_file
+(const char			*helper_dir,
+ const char			*file)
+{
+  char				path[PATH_MAX];
+  int				ret;
+
+  if (helper_dir == NULL || helper_dir[0] == '\0')
+    return ;
+  ret = snprintf(path, sizeof(path), "%s/%s", helper_dir, file);
+  if (ret >= 0 && (size_t)ret < sizeof(path))
+    unlink(path);
+}
+
+void				cleanup_program_trace(t_program_trace		*trace)
+{
+  if (trace == NULL || trace->helper_dir[0] == '\0')
+    return ;
+  if (strcmp(trace->type, "VM110N") == 0)
+    {
+      unlink_vm110n_path(trace->trace_file);
+      unlink_vm110n_path(trace->scenario_file);
+      unlink_vm110n_helper_file(trace->helper_dir, "lapin.h");
+      unlink_vm110n_helper_file(trace->helper_dir, "vm110n.c");
+      rmdir(trace->helper_dir);
+    }
+  trace->enabled = false;
+  trace->helper_dir[0] = '\0';
+  trace->trace_file[0] = '\0';
+  trace->scenario_file[0] = '\0';
 }
 
 t_technocore_result		prepare_program_trace
@@ -308,6 +416,7 @@ void				apply_program_trace_environment
     return ;
   if (strcmp(trace->type, "VM110N") == 0)
     {
+      setenv("TC_VM110N_HELPER_DIR", trace->helper_dir, 1);
       setenv("TC_VM110N_TRACE", trace->trace_file, 1);
       setenv("TC_VM110N_SCENARIO", trace->scenario_file, 1);
       setenv("TC_VM110N_MAX_WRITES", trace->max_writes, 1);

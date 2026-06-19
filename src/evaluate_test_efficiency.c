@@ -5,13 +5,7 @@
 ** TechnoCore
 */
 
-#include		<signal.h>
 #include		"technocore.h"
-
-static void		tmp(int n)
-{
-  tcdebug("signal %d", n);
-}
 
 void			evaluate_test_efficiency(t_trigger		*trigger,
 						 t_func_eval_mod	*fem,
@@ -21,7 +15,6 @@ void			evaluate_test_efficiency(t_trigger		*trigger,
   int			bkcase;
   bool			ok;
 
-  signal(SIGABRT, tmp);
   fem->result.test_func = true;
 
   //////////////////////////////////////////////////////

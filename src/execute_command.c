@@ -7,6 +7,8 @@
 
 #include		"technocore.h"
 
+#define			COMMAND_BUFFER_SIZE	(16 * 1024)
+
 t_technocore_result	execute_command(const char			*argv,
 					t_bunny_configuration		*general_cnf,
 					t_bunny_configuration		*exe,
@@ -27,13 +29,32 @@ t_technocore_result	execute_command(const char			*argv,
 		  );
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
+  char			buffer[COMMAND_BUFFER_SIZE];
+  char			command[COMMAND_BUFFER_SIZE];
+  int			siz;
+
   if (bunny_configuration_getf(cnf, &cmd, ".") == false)
     for (int i = 0; bunny_configuration_getf(cnf, &cmd, "[%d]", i); ++i)
       {
-	if (system(cmd) != 0)
-	  return (TC_FAILURE); // LCOV_EXCL_LINE
+	snprintf(&command[0], sizeof(command), "%s 2>&1", cmd);
+	siz = sizeof(buffer);
+	if (tcpopen("command module", &command[0], &buffer[0], &siz, NULL, 0) != 0)
+	  {
+	    add_to_current_report(act, cmd, "FailedCommand");
+	    add_to_current_report(act, &buffer[0], "Message");
+	    return (TC_FAILURE);
+	  }
       }
-  else if (system(cmd) != 0)
-    return (TC_FAILURE); // LCOV_EXCL_LINE
+  else
+    {
+      snprintf(&command[0], sizeof(command), "%s 2>&1", cmd);
+      siz = sizeof(buffer);
+      if (tcpopen("command module", &command[0], &buffer[0], &siz, NULL, 0) != 0)
+	{
+	  add_to_current_report(act, cmd, "FailedCommand");
+	  add_to_current_report(act, &buffer[0], "Message");
+	  return (TC_FAILURE);
+	}
+    }
   return (TC_SUCCESS);
 }

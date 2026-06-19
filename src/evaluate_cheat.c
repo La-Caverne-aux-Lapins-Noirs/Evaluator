@@ -102,11 +102,25 @@ t_technocore_result	evaluate_cheat(const char			*argv,
   res = TC_SUCCESS;
   bunny_configuration_getf(exe, &demangle, "DemangleSymbols");
 
-  if (tcpopen("cheat", "gcc -shared -o libcheat.so -fPIC `find . -name '*.o'`", &buffer[0], &siz, NULL, 0) != 0)
+  if (tcpopen("cheat find", "find . -name '*.o' -print", &buffer[0], &siz, NULL, 0) != 0)
     { // LCOV_EXCL_START
       add_message(&gl_technocore.error_buffer, "Cannot list object for the cheating module %s.\n", bunny_configuration_get_address(exe));
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
+  if (siz == 0)
+    {
+      if (add_to_current_report(act, "No object file found, forbidden function check skipped.", "Conclusion") == false)
+	return (TC_CRITICAL);
+      return (TC_SUCCESS);
+    }
+  siz = sizeof(buffer);
+  if (tcpopen("cheat", "gcc -shared -o libcheat.so -fPIC `find . -name '*.o'` 2>&1", &buffer[0], &siz, NULL, 0) != 0)
+    {
+      if (add_to_current_report(act, &buffer[0], "Message") == false ||
+	  add_to_current_report(act, "Cannot build temporary library for forbidden function check.", "Conclusion") == false)
+	return (TC_CRITICAL);
+      return (TC_FAILURE);
+    }
   const char		*tokens[4] = {"\r", "\n", " ", NULL};
   const char * const	*split;
   char			cmd[512];

@@ -5,6 +5,10 @@
 ** TechnoCore
 */
 
+#include		<errno.h>
+#include		<stdio.h>
+#include		<string.h>
+#include		<unistd.h>
 #include		"technocore.h"
 
 extern const char	*fieldname_first_char;
@@ -199,6 +203,30 @@ t_technocore_result	start_activity(const char			*argv0,
   return (TC_SUCCESS);
 
  DeleteTA:
+  while (tech.nbr_path > 0)
+    if (chdir(tech.pathstack[--tech.nbr_path]) != 0)
+      {
+	if (add_message
+	    (&gl_technocore.error_buffer,
+	     "%s: Cannot rewind path to %s while aborting evaluation. %s.\n",
+	     argv0, tech.pathstack[tech.nbr_path], strerror(errno)) == false)
+	  fprintf(stderr, "%s: Cannot rewind path while aborting evaluation.\n", argv0);
+	break ;
+      }
+  if (tech.report != NULL)
+    {
+      if (message_len(&gl_technocore.error_buffer) != 0)
+	{
+	  fprintf(stderr, "%s", get_message(&gl_technocore.error_buffer));
+	  if (tech.current_report != NULL)
+	    {
+	      bunny_configuration_setf(tech.current_report, "Critical", "Status");
+	      add_to_current_report(&tech, get_message(&gl_technocore.error_buffer), "InternalError");
+	    }
+	  bunny_configuration_setf(tech.report, get_message(&gl_technocore.error_buffer), "InternalError");
+	}
+      build_report(&tech);
+    }
   clear_technocore_activity(&tech);
   return (res);
 }

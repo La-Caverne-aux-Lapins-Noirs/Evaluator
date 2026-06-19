@@ -5,14 +5,15 @@
 ** TechnoCore
 */
 
-#include	<unistd.h>
-#include	<setjmp.h>
+#define			_POSIX_C_SOURCE		2023
+#include		<unistd.h>
+#include		<setjmp.h>
 
-extern jmp_buf	gl_before_test;
+extern sigjmp_buf	gl_before_test;
 
-void		sighandler(int		sig)
+void			sighandler(int		sig)
 {
   alarm(0);
-  longjmp(gl_before_test, sig);
+  siglongjmp(&gl_before_test, sig);
 }
 

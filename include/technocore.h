@@ -146,6 +146,7 @@ t_technocore_result	prepare_program_trace(const char		*argv0,
 				      t_program_trace	*trace);
 void			apply_program_trace_environment
 				      (const t_program_trace	*trace);
+void			cleanup_program_trace(t_program_trace	*trace);
 t_technocore_result	check_program_trace(t_technocore_activity	*act,
 				    const char			*name,
 				    const t_program_trace	*trace);
