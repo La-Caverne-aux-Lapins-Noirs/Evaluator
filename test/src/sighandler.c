@@ -5,8 +5,10 @@
 ** TechnoCore
 */
 
+#define			_POSIX_C_SOURCE		200809L
 #include		<setjmp.h>
 #include		<signal.h>
+#include		<unistd.h>
 #include		<assert.h>
 #include		"technocore.h"
 

@@ -20,7 +20,7 @@ run_test()
 rm -f trace
 
 if [ "$#" -eq "0" ]; then
-    for param in `find . -name '*.c'`; do
+    for param in `find ./src -maxdepth 1 -name '*.c'`; do
 	run_test $param
     done
     lcov --directory . --directory ../src/ -c -o coverage_raw.info #> /dev/null 2> /dev/null && \
