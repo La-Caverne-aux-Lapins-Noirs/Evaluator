@@ -84,10 +84,13 @@ int			main(int		argc,
 
       if (bunny_configuration_getf(cnf, &root_dir, "RootDir"))
 	bunny_configuration_push_path(root_dir);
-      if ((cnf = bunny_open_configuration("./activity.dab", cnf)) == NULL)
+      if (access("./activity.dab", F_OK) == 0)
 	{
-	  fprintf(stderr, "%s: Cannot open activity file for %s.\n", *argv, argv[i]);
-	  return (EXIT_FAILURE);
+	  if ((cnf = bunny_open_configuration("./activity.dab", cnf)) == NULL)
+	    {
+	      fprintf(stderr, "%s: Cannot open activity file for %s.\n", *argv, argv[i]);
+	      return (EXIT_FAILURE);
+	    }
 	}
       if (access("./authorized.dab", F_OK | R_OK) == 0)
 	if (bunny_open_configuration("./authorized.dab", cnf) == NULL)

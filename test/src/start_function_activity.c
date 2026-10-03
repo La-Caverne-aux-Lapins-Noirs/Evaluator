@@ -8,6 +8,7 @@
 #define			_POSIX_C_SOURCE				1
 #include		<signal.h>
 #include		<string.h>
+#include		<sys/resource.h>
 #include		<assert.h>
 #include		"technocore.h"
 
@@ -17,6 +18,20 @@ typedef int		(*t_func)(int				a);
 typedef int		(*t_test_func)(void);
 
 int			gl_signal;
+
+#define			STACK_OVERFLOW_SIGNAL			-2
+
+__attribute__((noinline))
+static void		overflow_stack(unsigned int		depth)
+{
+  volatile unsigned char	keep[4096];
+  void			(*next)(unsigned int) = overflow_stack;
+
+  keep[depth % sizeof(keep)] = (unsigned char)depth;
+  next(depth + 1);
+  if (keep[0] == 42)
+    write(STDERR_FILENO, "x", 1);
+}
 
 int			function_to_evaluate(int		x)
 {
@@ -46,7 +61,9 @@ t_technocore_result	test_function(void			*user_handler,
   assert(func == function_to_evaluate);
   assert(test == test_function_to_evaluate);
   assert(test_function_to_evaluate() == 0);
-  if (gl_signal > 0)
+  if (gl_signal == STACK_OVERFLOW_SIGNAL)
+    overflow_stack(0);
+  else if (gl_signal > 0)
     {
       if (gl_signal == SIGALRM)
 	alarm(0);
@@ -60,6 +77,8 @@ int			main(void)
   t_bunny_configuration	*global;
   t_bunny_configuration	*local;
   t_technocore_activity	act;
+  struct rlimit		old_stack_limit;
+  struct rlimit		stack_limit;
   const char		*code =
     "Module = \"local\"\n"
     "UserLibrary = \"local\"\n"
@@ -115,6 +134,18 @@ int			main(void)
   assert(start_function_activity("aaa", global, local, &act) == TC_FAILURE);
   assert(bunny_configuration_getf(act.current_report, &code, "Message"));
   assert(strcmp("Illegal instruction.\n", code) == 0);
+  bunny_configuration_setf(act.current_report, NULL, "Message");
+
+  assert(getrlimit(RLIMIT_STACK, &old_stack_limit) == 0);
+  stack_limit = old_stack_limit;
+  if (stack_limit.rlim_cur > 256 * 1024)
+    stack_limit.rlim_cur = 256 * 1024;
+  assert(setrlimit(RLIMIT_STACK, &stack_limit) == 0);
+  gl_signal = STACK_OVERFLOW_SIGNAL;
+  assert(start_function_activity("aaa", global, local, &act) == TC_FAILURE);
+  assert(bunny_configuration_getf(act.current_report, &code, "Message"));
+  assert(strcmp("Segmentation fault.\n", code) == 0);
+  assert(setrlimit(RLIMIT_STACK, &old_stack_limit) == 0);
   bunny_configuration_setf(act.current_report, NULL, "Message");
 
   return (EXIT_SUCCESS);

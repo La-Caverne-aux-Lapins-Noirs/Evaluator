@@ -25,9 +25,13 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
   
   cnt = 0;
   memset(&p, 0, sizeof(p));
-  if (!retrieve_all_files(basepath, NBRCELL(basepath), &cnt, NBRCELL(files), NBRCELL(files[0]), files, ".c"))
+  if (!retrieve_all_files(basepath, NBRCELL(basepath), &cnt, NBRCELL(files),
+                          NBRCELL(files[0]), files, ".c") ||
+      !retrieve_all_files(basepath, NBRCELL(basepath), &cnt, NBRCELL(files),
+                          NBRCELL(files[0]), files, ".h"))
     { // LCOV_EXCL_START
-      add_message(&gl_technocore.error_buffer, "Cannot retrieve all %s files from repository.\n", ".c");
+      add_message(&gl_technocore.error_buffer,
+                  "Cannot retrieve all C source and header files from repository.\n");
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
   load_norm_configuration(&p, exe);
@@ -36,7 +40,7 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
     {
       char		*code;
 
-      // Pour chaque fichier .c
+      // Pour chaque fichier .c ou .h
       if ((code = load_c_file(files[j], exe, true)) == NULL)
 	return (TC_CRITICAL);
       i = 0;
@@ -58,7 +62,8 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
 	  add_message(&gl_technocore.error_buffer, "Cannot add norm conclusion.\n");
 	  return (TC_CRITICAL);
 	} // LCOV_EXCL_STOP
-      if (!add_exercise_medal(act, "norm_rejected"))
+      if (!bunny_configuration_getf(exe, NULL, "NoMedals") &&
+          !add_exercise_medal(act, "norm_rejected"))
 	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "Cannot add norm medal.\n");
 	  return (TC_CRITICAL);
@@ -67,7 +72,8 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
     }
   if (p.nbr_error_points == 0)
     {
-      if (!add_exercise_medal(act, "norm_perfect"))
+      if (!bunny_configuration_getf(exe, NULL, "NoMedals") &&
+          !add_exercise_medal(act, "norm_perfect"))
 	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "Cannot add norm medal.\n");
 	  return (TC_CRITICAL);
@@ -75,7 +81,8 @@ t_technocore_result evaluate_file_c_norm(const char		*argv0,
     }
   else if (p.nbr_error_points < p.maximum_error_points)
     {
-      if (!add_exercise_medal(act, "norm_correct"))
+      if (!bunny_configuration_getf(exe, NULL, "NoMedals") &&
+          !add_exercise_medal(act, "norm_correct"))
 	{ // LCOV_EXCL_START
 	  add_message(&gl_technocore.error_buffer, "Cannot add norm medal.\n");
 	  return (TC_CRITICAL);

@@ -7,6 +7,8 @@
 
 #define			_GNU_SOURCE
 #include		<fnmatch.h>
+#include		<ctype.h>
+#include		<string.h>
 #include		<stdio.h>
 #include		<errno.h>
 #include		<unistd.h>
@@ -55,6 +57,105 @@ static t_technocore_result try_make(t_technocore_activity	*act,
   return (report(act, exe, TC_FAILURE, "MakeFailed", "not_build"));
 }
 
+static bool             safe_product_name(const char *str)
+{
+  size_t                i;
+
+  if (str == NULL || str[0] == '\0' || strcmp(str, ".") == 0 ||
+      strcmp(str, "..") == 0)
+    return (false);
+  for (i = 0; str[i] != '\0'; ++i)
+    if (!isalnum((unsigned char)str[i]) && str[i] != '_' &&
+        str[i] != '-' && str[i] != '.' && str[i] != '+')
+      return (false);
+  return (true);
+}
+
+static void             trim_line(char *str)
+{
+  size_t                begin;
+  size_t                end;
+
+  begin = 0;
+  while (isspace((unsigned char)str[begin]))
+    begin += 1;
+  if (begin != 0)
+    memmove(str, &str[begin], strlen(&str[begin]) + 1);
+  end = strlen(str);
+  while (end > 0 && isspace((unsigned char)str[end - 1]))
+    str[--end] = '\0';
+}
+
+static bool             makefile_product_name(char *buffer, size_t len)
+{
+  static const char     *variables[] =
+    {"NAME", "PRG", "PROGRAM", "TARGET", "PRODUCT", "BINARY", "LIBRARY", NULL};
+  char                  command[512];
+  int                   size;
+
+  for (size_t i = 0; variables[i] != NULL; ++i)
+    {
+      snprintf(command, sizeof(command),
+               "make -s --no-print-directory "
+               "--eval='__technocore_name: ; @printf \"%%s\\n\" \"$(%s)\"' "
+               "__technocore_name", variables[i]);
+      size = (int)len;
+      if (tcpopen("make module", command, buffer, &size, NULL, 0) != 0)
+        continue ;
+      trim_line(buffer);
+      if (safe_product_name(buffer) && file_exists(buffer))
+        return (true);
+    }
+  return (false);
+}
+
+static bool             built_product_name(char *buffer, size_t len)
+{
+  const char            *command;
+  char                  *newline;
+  int                   size;
+
+  command = "find . -maxdepth 1 -type f "
+    "\\( -name '*.a' -o -name '*.so' -o -perm /111 \\) "
+    "-exec sh -c 'nm \"$1\" > /dev/null 2>&1' sh {} \\; "
+    "-printf '%f\\n' | sort";
+  size = (int)len;
+  if (tcpopen("make module", command, buffer, &size, NULL, 0) != 0)
+    return (false);
+  trim_line(buffer);
+  if (buffer[0] == '\0')
+    return (false);
+  newline = strchr(buffer, '\n');
+  if (newline != NULL)
+    return (false);
+  return (safe_product_name(buffer));
+}
+
+static bool             resolve_product_name(t_bunny_configuration *exe,
+                                             const char **product,
+                                             char *buffer,
+                                             size_t len,
+                                             bool *inferred)
+{
+  if (bunny_configuration_getf(exe, product, "ProductName"))
+    {
+      *inferred = false;
+      return (true);
+    }
+  *inferred = true;
+  if (makefile_product_name(buffer, len))
+    {
+      *product = buffer;
+      return (true);
+    }
+  if (built_product_name(buffer, len))
+    {
+      *product = buffer;
+      return (true);
+    }
+  return (false);
+}
+
 t_technocore_result	evaluate_make_build(const char			*argv,
 					    t_bunny_configuration	*gen,
 					    t_bunny_configuration	*exe,
@@ -87,13 +188,17 @@ t_technocore_result	evaluate_make_build(const char			*argv,
 
   if ((res = try_make(act, exe)) != TC_SUCCESS)
     return (res);
-  // On vérifie si le programme demandé a bien été produit et qu'il y a bien des fichiers .o
-  if (!bunny_configuration_getf(exe, &product_name, "ProductName"))
-    { // LCOV_EXCL_START
-      add_message(&gl_technocore.error_buffer, "Missing ProductName field for make module.\n");
-      return (TC_CRITICAL);
-    } // LCOV_EXCL_STOP
-  if (!file_exists(product_name))
+  // On vérifie si le programme demandé a bien été produit et qu'il y a bien des fichiers .o.
+  // ProductName reste prioritaire, mais le mode implicite peut fonctionner sans fichier .dab:
+  // on essaie alors NAME dans le Makefile, puis un produit racine non ambigu.
+  char			product_buffer[1024];
+  bool                  inferred_product;
+
+  if (!resolve_product_name(exe, &product_name, product_buffer,
+                            sizeof(product_buffer), &inferred_product))
+    return (report(act, exe, TC_FAILURE, "ProductWasNotBuilt", "not_build"));
+  if ((inferred_product && !safe_product_name(product_name)) ||
+      !file_exists(product_name))
     return (report(act, exe, TC_FAILURE, "ProductWasNotBuilt", "not_build"));
   if (tcpopen("make module", "find . -name \"*.o\"", &buffer[0], &x, NULL, 0) != 0)
     { // LCOV_EXCL_START

@@ -5,8 +5,10 @@ Utilisation du logiciel
  Le TechnoCentre prend autant de paramètres qu'on le souhaite. Chaque paramètre est un dossier
  dans lequel le logicel va se rendre afin d'effectuer une correction.
 
- Le TechnoCentre attend dans le dossier de correction la présence d'un fichier activity.dab.
- Il attend optionnellement un fichier authorized.dab contenant les fonctions autorités pour l'évaluation.
+ Le fichier activity.dab est optionnel. En son absence, Evaluator applique uniquement le socle
+ d'évaluation défini par DefaultEvaluation dans la configuration générale. Un fichier activity.dab
+ ajoute des évaluations spécifiques et peut remplacer les vérifications implicites équivalentes.
+ Evaluator accepte aussi un fichier authorized.dab optionnel contenant les fonctions autorisées.
 
  Le TechnoCentre néccessite, si il est en debug, la présence d'un fichier dictionnary.dab situé dans
  le même dossier que lui. Si il est en prod, le fichier doit être /usr/share/technocore/evaluator/dictionnary.dab
@@ -14,6 +16,38 @@ Utilisation du logiciel
 
  Le TechnoCentre néccessite, si il est en debug, la présence d'un fichier configuration.dab situé dans
  le même dossier que lui. Si il est en prod, le fichier doit être /etc/technocore/configuration.dab
+
+
+Socle d'évaluation implicite
+============================
+
+ Le bloc DefaultEvaluation de la configuration générale pilote les vérifications exécutées même
+ lorsqu'aucun activity.dab n'existe. Par défaut dans la configuration EFRITS :
+  - Cleanliness vérifie toujours la propreté du rendu.
+  - Norm vérifie les fichiers .c et .h avec la norme de présentation de l'école.
+  - Make vérifie le Makefile lorsqu'un rendu contient des sources C/C++ ou des en-têtes.
+  - Check active la vérification de la règle make check et de tests/report/.
+  - Install est désactivé par défaut et doit être demandé explicitement.
+
+ Les valeurs peuvent être désactivées globalement avec Enabled = false ou individuellement.
+ DefaultEvaluation.NormConfiguration peut indiquer explicitement le fichier de norme à charger.
+ Sans ce champ, Evaluator cherche :
+
+ RootDir # "ressources/schools/" # School # "/standard_style.dab"
+
+ Lorsqu'une activité utilise des Move, chaque dossier rejoint constitue un scope d'évaluation.
+ Evaluator applique le socle dans ce scope sauf si le scope contient déjà le test explicite
+ correspondant : Builtin/Cleanliness, Builtin/Norm ou Construction/Make. Les autres constructions
+ (Object, Full, Cheat...) ne remplacent pas le contrôle implicite du Makefile.
+
+ Si l'activité n'utilise aucun Move, le dossier remis à Evaluator est le scope unique. Cela permet
+ de corriger immédiatement un ancien rendu sans écrire de fichier .dab : la correction fonctionnelle
+ spécifique sera absente, mais la propreté, le style C/H et le Makefile restent évaluables.
+
+ Pour le module Make, ProductName est toujours prioritaire lorsqu'il est fourni. En son absence,
+ Evaluator essaie les variables usuelles du Makefile (NAME, PRG, PROGRAM, TARGET, PRODUCT,
+ BINARY, LIBRARY) puis, à défaut, un unique binaire ou une unique bibliothèque construite à la
+ racine. Le socle active check mais pas install.
 
 Organisation générale d'un fichier de description d'activité
 ============================================================
@@ -26,12 +60,15 @@ Organisation générale d'un fichier de description d'activité
   - Un champ "MaximumRam" permettant de limiter la RAM consommé pour un seul élève dans l'allocateur
     de la LibLapin. Par défaut, c'est 2Mo.
   - Un tableau "Exercises" dont chaque case est un "bloc d'évaluation", terme utilisé par la suite.
-    Les blocs d'evaluation sont executés dans l'ordre.
+    Les blocs d'evaluation sont executés dans l'ordre. Une chaîne placée directement dans ce tableau
+    est considérée comme une directive destinée à DocBuilder et est ignorée par Evaluator.
 
  Chaque bloc d'évaluation doit ou peu comporter:
   - Un champ "Name".
   - Un champ "Type". Par défaut, il faut "Function".
-    Deux autres valeurs sont valables: "Program" et "Builtin".
+    Trois autres valeurs sont valables: "Program", "Builtin" et "Document".
+    "Document" désigne un bloc strictement documentaire. Evaluator l'ignore inconditionnellement,
+    avant ConditionalVar, la création du rapport et les éventuels effets de bord tels que SetVar.
   - Un champ StopOnFailure valant faux par défaut.
     Si il est vrai, un échec a l'exercice cesse la totalité de l'évaluation.
 

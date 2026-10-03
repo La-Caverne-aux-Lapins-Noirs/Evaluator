@@ -22,3 +22,12 @@ PutChar = FunctionPrefix # "putchar" # FunctionSuffix
   __assert_fail
 ]
 
+
+[DefaultEvaluation
+  Enabled = true
+  Cleanliness = true
+  Norm = false
+  Make = true
+  Check = true
+  Install = false
+]

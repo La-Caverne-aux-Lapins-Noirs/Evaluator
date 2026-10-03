@@ -36,7 +36,13 @@ bool			retrieve_all_files(char			*path,
 	continue ;
       if (dirent->d_type != DT_DIR)
 	{
-	  if (strncmp(ext, &dirent->d_name[strlen(dirent->d_name) - strlen(ext)], strlen(ext)) != 0)
+	  size_t	name_len;
+	  size_t	ext_len;
+
+	  name_len = strlen(dirent->d_name);
+	  ext_len = strlen(ext);
+	  if (name_len < ext_len ||
+	      strncmp(ext, &dirent->d_name[name_len - ext_len], ext_len) != 0)
 	    continue ;
 	  snprintf(files[*browse], cellsize, "%s/%s", path, dirent->d_name);
 	  if (*browse + 1 >= cells)

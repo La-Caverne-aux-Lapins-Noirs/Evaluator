@@ -31,6 +31,10 @@ int			main(void)
   assert(chdir("failure") == 0);
   assert(evaluate_file_c_norm("norm", NULL, cnf, &act) == TC_FAILURE);
 
+  assert(chdir("../") == 0);
+  assert(chdir("header_failure") == 0);
+  assert(evaluate_file_c_norm("norm", NULL, cnf, &act) == TC_FAILURE);
+
   return (0);
 }
 

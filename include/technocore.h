@@ -58,6 +58,13 @@ t_technocore_result	start_builtin_activity(const char		*argv0,
 					       t_bunny_configuration	*act_cnf,
 					       t_technocore_activity	*act);
 bool			build_report(t_technocore_activity		*tech);
+bool			activity_has_default_scopes(t_bunny_configuration	*cnf);
+t_technocore_result	evaluate_default_scope(const char			*argv0,
+				       t_bunny_configuration		*cnf,
+				       t_technocore_activity		*tech,
+				       int				*excnt,
+				       int				start,
+				       bool				bounded);
 
 typedef struct		s_function
 {

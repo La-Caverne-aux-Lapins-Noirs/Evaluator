@@ -43,5 +43,12 @@ int			main(void)
     else if (strcmp(buffer[i], "./sub2/file6.x") == 0)
       fnd += 1;
   assert(fnd == nbr);
+
+  nbr = 0;
+  path[0] = '.';
+  path[1] = '\0';
+  assert(retrieve_all_files(path, NBRCELL(path), &nbr, 16, 64, buffer,
+                            ".extension_longer_than_any_short_filename"));
+  assert(nbr == 0);
   return (0);
 }

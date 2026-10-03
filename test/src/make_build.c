@@ -432,5 +432,17 @@ int			main(void)
   bunny_delete_node(act.current_report, "Conclusion");
   assert(chdir("..") == 0);
 
+  /////////////////////////////////////////////////////////
+  // Etape 20: ProductName est déduit sans configuration Dabsic.
+  bunny_delete_node(cnf, "ProductName");
+  assert(chdir("makeH") == 0);
+  assert(system("rm -rf .bin .lib .inc && make fclean > /dev/null 2>&1") == 0);
+  assert(evaluate_make_build("a", cnf, cnf, &act) == TC_SUCCESS);
+  assert(bunny_configuration_getf(act.current_report, &str, "Conclusion"));
+  assert(strcmp(str, "Your construction system is correct.\n") == 0);
+  bunny_delete_node(act.current_report, "Steps");
+  bunny_delete_node(act.current_report, "Conclusion");
+  assert(chdir("..") == 0);
+
   return (EXIT_SUCCESS);
 }

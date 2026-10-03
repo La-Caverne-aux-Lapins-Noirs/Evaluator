@@ -11,12 +11,16 @@
 
 #include			<signal.h>
 #include			<setjmp.h>
+#include			<stdlib.h>
 #include			"technocore.h"
 
 #define				PAGT(label, a, ...)		\
   do { fprintf(stderr, a, ##__VA_ARGS__); goto label; } while (0)
 
-sigjmp_buf				gl_before_test;
+sigjmp_buf			gl_before_test;
+volatile sig_atomic_t		gl_before_test_ready;
+
+#define				ALT_SIGNAL_STACK_MIN				(64 * 1024)
 
 static t_technocore_result	prepare_jump(const char				*argv0,
 					     void				*user_handler,
@@ -33,11 +37,18 @@ static t_technocore_result	prepare_jump(const char				*argv0,
   bunny_configuration_getf(general_cnf, &del, "Timeout");
   bunny_configuration_getf(exe_cnf, &del, "Timeout");
 
-  alarm(abs(del));
+  gl_before_test_ready = 0;
   if ((err = sigsetjmp(gl_before_test, 1)) == 0)
-    res = tech_func(user_handler, general_cnf, exe_cnf, act);
+    {
+      gl_before_test_ready = 1;
+      alarm(abs(del));
+      res = tech_func(user_handler, general_cnf, exe_cnf, act);
+      alarm(0);
+      gl_before_test_ready = 0;
+    }
   else
     {
+      gl_before_test_ready = 0;
       bool			suc = true;
 
       res = TC_FAILURE;
@@ -118,9 +129,9 @@ static t_technocore_result	prepare_io(const char				*argv0,
 
   if (message_len(&gl_technocore.error_buffer) != 0)
     { // LCOV_EXCL_START
-      t_bunny_configuration *root = bunny_configuration_get_root(exe_cnf);
-      t_bunny_configuration *cnf = exe_cnf;
-      const char	*top = NULL;
+      t_bunny_configuration	*root = bunny_configuration_get_root(exe_cnf);
+      t_bunny_configuration	*cnf = exe_cnf;
+      const char		*top = NULL;
 
       while (!bunny_configuration_getf(cnf, &top, "Name") && cnf != root)
 	bunny_configuration_getf(cnf, &cnf, "..");
@@ -144,6 +155,56 @@ static t_technocore_result	prepare_io(const char				*argv0,
   return (res);
 }
 
+static bool			prepare_signal_stack(const char			*argv0,
+						     stack_t			*old_stack,
+						     void			**memory)
+{
+  stack_t			signal_stack;
+  size_t			stack_size;
+
+  if (sigaltstack(NULL, old_stack) == -1)
+    {
+      fprintf(stderr, "%s: Cannot read alternate signal stack: %s.\n",
+	      argv0, strerror(errno));
+      return (false);
+    }
+  stack_size = SIGSTKSZ;
+  if (stack_size < ALT_SIGNAL_STACK_MIN)
+    stack_size = ALT_SIGNAL_STACK_MIN;
+  if ((*memory = malloc(stack_size)) == NULL)
+    {
+      fprintf(stderr, "%s: Cannot allocate alternate signal stack.\n", argv0);
+      return (false);
+    }
+  signal_stack.ss_sp = *memory;
+  signal_stack.ss_size = stack_size;
+  signal_stack.ss_flags = 0;
+  if (sigaltstack(&signal_stack, NULL) == -1)
+    {
+      fprintf(stderr, "%s: Cannot install alternate signal stack: %s.\n",
+	      argv0, strerror(errno));
+      free(*memory);
+      *memory = NULL;
+      return (false);
+    }
+  return (true);
+}
+
+static bool			restore_signal_stack(const char			*argv0,
+						     const stack_t		*old_stack,
+						     void			*memory)
+{
+  if (sigaltstack(old_stack, NULL) == -1)
+    {
+      fprintf(stderr, "%s: Cannot restore alternate signal stack: %s.\n",
+	      argv0, strerror(errno));
+      return (false);
+    }
+  free(memory);
+  return (true);
+}
+
+
 static t_technocore_result	prepare_sighandlers(const char			*argv0,
 						    void			*user_handler,
 						    t_technocore_main		tech_func,
@@ -164,16 +225,23 @@ static t_technocore_result	prepare_sighandlers(const char			*argv0,
   t_technocore_result		res;
   struct sigaction		act_sig;
   struct sigaction		old_handlers[NBRCELL(sigs)];
+  stack_t			old_stack;
+  void				*signal_stack = NULL;
 
+  if (!prepare_signal_stack(argv0, &old_stack, &signal_stack))
+    return (TC_FAILURE);
   memset(&act_sig, 0, sizeof(act_sig));
   act_sig.sa_handler = sighandler;
-  sigemptyset(&act_sig.sa_mask);
+  sigfillset(&act_sig.sa_mask);
+  act_sig.sa_flags = SA_ONSTACK;
   for (int i = 0; i < (int)NBRCELL(old_handlers); ++i)
     if (sigaction(sigs[i], &act_sig, &old_handlers[i]) == -1)
       { // LCOV_EXCL_START
 	fprintf(stderr, "%s: Cannot set handler for signal %d.\n", argv0, sigs[i]);
 	for (i -= 1; i >= 0; --i)
 	  sigaction(sigs[i], &old_handlers[i], NULL);
+	if (!restore_signal_stack(argv0, &old_stack, signal_stack))
+	  return (TC_CRITICAL);
 	return (TC_FAILURE);
       } // LCOV_EXCL_STOP
 
@@ -181,6 +249,8 @@ static t_technocore_result	prepare_sighandlers(const char			*argv0,
 
   for (int i = 0; i < (int)NBRCELL(old_handlers); ++i)
     sigaction(sigs[i], &old_handlers[i], NULL);
+  if (!restore_signal_stack(argv0, &old_stack, signal_stack))
+    return (TC_CRITICAL);
   return (res);
 }
 

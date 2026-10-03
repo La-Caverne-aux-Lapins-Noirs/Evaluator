@@ -42,6 +42,7 @@ t_technocore_result	start_activity(const char			*argv0,
   t_bunny_configuration	*rot;
   t_technocore_result	res;
   const char		*str;
+  const char		*type;
   int			failedcnt;
   int			excnt;
   char			debug_buffer[248];
@@ -56,6 +57,12 @@ t_technocore_result	start_activity(const char			*argv0,
       return (TC_CRITICAL);
     } // LCOV_EXCL_STOP
   excnt = 0;
+  if (!activity_has_default_scopes(cnf))
+    {
+      res = evaluate_default_scope(argv0, cnf, &tech, &excnt, 0, false);
+      if (res == TC_CRITICAL)
+	goto DeleteTA;
+    }
   for (i = 0; bunny_configuration_getf(cnf, &act, "Exercises[%d]", i); ++i)
     {
       if (getcwd(debug_buffer, sizeof(debug_buffer)) == NULL)
@@ -63,8 +70,15 @@ t_technocore_result	start_activity(const char			*argv0,
 	  fprintf(stderr, "%s: Failed to fetch working directory %s.\n", argv0, strerror(errno));
 	  return (TC_CRITICAL);
 	}
-      if (bunny_configuration_getf(cnf, &str, "."))
-	continue ; // LCOV_EXCL_LINE Si le noeud est une chaine de caractère, c'est une directive pour docbuilder...
+      if (bunny_configuration_getf(act, &str, "."))
+	continue ; // Si le noeud est une chaine de caractère, c'est une directive pour docbuilder...
+
+      // Les blocs Document sont exclusivement destinés aux générateurs de documents.
+      // Ils ne doivent produire aucun rapport ni aucun effet de bord dans Evaluator.
+      type = "Function";
+      bunny_configuration_getf(act, &type, "Type");
+      if (bunny_strcasecmp(type, "Document") == 0)
+	continue ;
 
       // Condition pour executer le bloc
       if (bunny_configuration_getf(act, &str, "ConditionalVar"))
@@ -103,23 +117,31 @@ t_technocore_result	start_activity(const char			*argv0,
       else
 	tech.current_report = NULL;
 
-      // Le type par défaut d'exercce, c'est "Function".
-      if (bunny_configuration_getf(act, &str, "Type") == false)
-	str = "Function";
+      bool		enter_default_scope;
+      const char	*module;
+      const char	*target;
+
+      enter_default_scope = false;
+      if (bunny_strcasecmp(type, "Builtin") == 0 &&
+	  bunny_configuration_getf(act, &module, "Module") &&
+	  bunny_strcasecmp(module, "Move") == 0 &&
+	  bunny_configuration_getf(act, &target, "Target") &&
+	  strcmp(target, "-") != 0)
+	enter_default_scope = true;
 
       // On corrige une fonction, il faut donc charger une bibliothèque dynamique
-      if (bunny_strcasecmp(str, "Function") == 0)
+      if (bunny_strcasecmp(type, "Function") == 0)
 	res = start_function_activity(argv0, cnf, act, &tech);
       // On corrige un programme.
-      else if (bunny_strcasecmp(str, "Program") == 0)
+      else if (bunny_strcasecmp(type, "Program") == 0)
 	res = start_program_activity(argv0, cnf, act, &tech);
-      else if (bunny_strcasecmp(str, "Builtin") == 0)
+      else if (bunny_strcasecmp(type, "Builtin") == 0)
 	res = start_builtin_activity(argv0, cnf, act, &tech);
       else
 	{  // LCOV_EXCL_START
 	  fprintf(stderr,
 		  "%s: Invalid type %s specified in configuration for %s.\n",
-		  argv0, str, bunny_configuration_get_address(act));
+		  argv0, type, bunny_configuration_get_address(act));
 	  goto DeleteTA;
 	} // LCOV_EXCL_STOP
 
@@ -174,6 +196,19 @@ t_technocore_result	start_activity(const char			*argv0,
 		res = TC_CRITICAL;
 		goto DeleteTA;
 	      }
+	}
+
+      if (res == TC_SUCCESS && enter_default_scope)
+	{
+	  t_technocore_result default_res;
+
+	  default_res = evaluate_default_scope(argv0, cnf, &tech, &excnt,
+				       i + 1, true);
+	  if (default_res == TC_CRITICAL)
+	    {
+	      res = TC_CRITICAL;
+	      goto DeleteTA;
+	    }
 	}
     }
 

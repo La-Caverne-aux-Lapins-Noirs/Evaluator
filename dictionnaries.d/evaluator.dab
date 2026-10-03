@@ -1,5 +1,8 @@
 [EN
   Exercise = "Exercise%02zu"
+  DefaultCleanliness = "Repository cleanliness"
+  DefaultNorm = "Coding style"
+  DefaultMake = "Makefile and tests"
   CannotFindLibrary = "Cannot find library file '%s'. %s.\n"
   CannotFindFunction = "Cannot find function '%s' in your library.\n"
   Timeout = "Timeout. Maximum delay was %d seconds.\n"
@@ -106,6 +109,9 @@
 
 [FR
   Exercise = "Exercice%02zu"
+  DefaultCleanliness = "Propreté du rendu"
+  DefaultNorm = "Norme de présentation"
+  DefaultMake = "Makefile et tests"
   CannotFindLibrary = "Impossible de trouver votre bibliothèque '%s'. %s.\n"
   CannotFindFunction = "Impossible de trouver la fonction '%s' dans votre bibliothèque.\n"
   Timeout = "Trop lent. Le délai maximum étant de %d secondes.\n"
